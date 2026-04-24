@@ -422,9 +422,9 @@
         { name: '可口可乐', slogan: 'Taste the Feeling，畅爽开怀。', bg: 'https://images.pexels.com/photos/2983101/pexels-photo-2983101.jpeg', url: 'https://www.coca-cola.com.cn' },
     ];
     const QUESTIONS = {
-        0: [ { q: '路虎「Above & Beyond」意为？', optA: '永不言败', optB: '探索无尽', correct: 'B' }, { q: '路虎核心全地形技术？', optA: 'Terrain Response', optB: 'Quattro', correct: 'A' } ],
-        1: [ { q: '优酸乳主要口味？', optA: '草莓', optB: '蓝莓', correct: 'A' }, { q: '优酸乳属于？', optA: '伊利', optB: '蒙牛', correct: 'A' } ],
-        2: [ { q: '可口可乐经典瓶身颜色？', optA: '红色', optB: '蓝色', correct: 'A' }, { q: '可口可乐诞生于？', optA: '1886年', optB: '1901年', correct: 'A' } ],
+        0: [ { q: '路虎「Above & Beyond」意为？', optA: '永不言败', optB: '探索无尽', correct: 'B' }, { q: '路虎核心全地形技术？', optA: 'Terrain Response', optB: 'Quattro', correct: 'A' }, { q: '路虎诞生于？', optA: '英国', optB: '美国', correct: 'A' }, { q: '路虎卫士主打？', optA: '极致越野', optB: '城市通勤', correct: 'A' } ],
+        1: [ { q: '优酸乳主要口味？', optA: '草莓', optB: '蓝莓', correct: 'A' }, { q: '优酸乳属于？', optA: '伊利', optB: '蒙牛', correct: 'A' }, { q: '优酸乳品牌主张？', optA: '青春就要酸甜', optB: '健康每一天', correct: 'A' } ],
+        2: [ { q: '可口可乐经典瓶身颜色？', optA: '红色', optB: '蓝色', correct: 'A' }, { q: '可口可乐诞生于？', optA: '1886年', optB: '1901年', correct: 'A' }, { q: '可口可乐英文是？', optA: 'Coca-Cola', optB: 'Pepsi', correct: 'A' } ],
     };
     const AI_KNOWLEDGE = {
         jokes: ['为什么企鹅不怕冷？因为它们有"企"业文化！🐧','程序员去沙漠越野，说："这里全是沙盒环境！"','可口可乐和百事可乐打架，你猜谁赢了？——裁判说：都"气"消了。','路虎车主最怕什么？——油价上涨，因为油箱比游泳池还大。'],
@@ -446,6 +446,7 @@
     const expPerLevel = [0, 100, 250, 500, 1000];
 
     let currentVideo = null, currentEp = 1;
+    let currentBrandIndex = 0; // 当前展示的品牌索引
     let adActive = false, adTimeLeft = 0, adTimer = null;
     let penguinVisible = false, questionActive = false, cooldown = false, waitingForNext = false;
     let correctCount = 0, combo = 0;
@@ -454,17 +455,40 @@
     let ownedItems = [];
     let currentHat = null;
     let brandStats = { 0: { correct: 0, total: 0 }, 1: { correct: 0, total: 0 }, 2: { correct: 0, total: 0 } };
-    const PREFERENCE_PROBABILITY = 0.7;
+    // 当前广告可用的题目池
+    let currentQuestionPool = [];
+
+    function selectBrandByPreference() {
+        const stats = [brandStats[0], brandStats[1], brandStats[2]];
+        const rates = stats.map(s => s.total > 0 ? s.correct / s.total : -1);
+        let maxRate = -1;
+        let bestIndex = -1;
+        for (let i = 0; i < 3; i++) {
+            if (rates[i] > maxRate) {
+                maxRate = rates[i];
+                bestIndex = i;
+            }
+        }
+        // 如果没有任何数据，或者三个正确率都相同（比如都是0或-1），则均分概率
+        if (maxRate === -1 || rates.every(r => r === maxRate)) {
+            const rand = Math.random();
+            if (rand < 1/3) return 0;
+            if (rand < 2/3) return 1;
+            return 2;
+        }
+        // 按概率分配：最佳品牌 50%，其余各 25%
+        const rand = Math.random();
+        if (rand < 0.5) return bestIndex;
+        const others = [0,1,2].filter(i => i !== bestIndex);
+        if (rand < 0.75) return others[0];
+        return others[1];
+    }
 
     function getUserPreferredBrand() {
-        let bestBrand = 0, bestRate = -1;
-        for (let i = 0; i < 3; i++) {
-            const s = brandStats[i];
-            if (s.total === 0) continue;
-            const rate = s.correct / s.total;
-            if (rate > bestRate) { bestRate = rate; bestBrand = i; }
-        }
-        return bestRate > 0 ? bestBrand : null;
+        const rates = [0,1,2].map(i => brandStats[i].total > 0 ? brandStats[i].correct / brandStats[i].total : -1);
+        let bestIndex = -1, maxRate = -1;
+        rates.forEach((r, i) => { if (r > maxRate) { maxRate = r; bestIndex = i; } });
+        return maxRate > 0 ? bestIndex : null;
     }
 
     function renderHome() {
@@ -522,14 +546,15 @@
         document.getElementById('watchProgressContainer').style.display = 'none';
         document.getElementById('watchProgressFill').style.width = '0%';
         watchTime = 0;
+        // 根据偏好选择品牌
+        currentBrandIndex = selectBrandByPreference();
+        // 重置题目池：深拷贝当前品牌的全部题目
+        currentQuestionPool = JSON.parse(JSON.stringify(QUESTIONS[currentBrandIndex]));
         setTimeout(() => { document.getElementById('adLayer').classList.add('active'); pw.style.transition = 'none'; startAd(); }, 30);
     }
 
     function startAd() {
-        let brandIndex = currentVideo.brand;
-        const prefBrand = getUserPreferredBrand();
-        if (prefBrand !== null && Math.random() < PREFERENCE_PROBABILITY) brandIndex = prefBrand;
-        const b = BRANDS[brandIndex];
+        const b = BRANDS[currentBrandIndex];
         document.getElementById('adBrandName').textContent = b.name;
         document.getElementById('adBrandSlogan').textContent = b.slogan;
         document.getElementById('adLayer').style.backgroundImage = `url('${b.bg}')`;
@@ -546,8 +571,8 @@
             const safeZone = document.getElementById('penguinSafeArea');
             if (safeZone && safeZone.contains(e.target)) return;
             if (e.target.closest('.ad-click-area') || e.target.closest('.ai-chat-panel') || e.target.closest('.speed-badge') || e.target.closest('.user-center-overlay') || e.target.closest('.penguin-bubble') || e.target.closest('.quiz-opts') || e.target.closest('.next-question-btn') || e.target.closest('.penguin-name-tag') || e.target.closest('.penguin-stats-bar')) return;
-            const brand = BRANDS[brandIndex];
-            brandStats[brandIndex].clicked = (brandStats[brandIndex].clicked || 0) + 1;
+            const brand = BRANDS[currentBrandIndex];
+            brandStats[currentBrandIndex].clicked = (brandStats[currentBrandIndex].clicked || 0) + 1;
             window.open(brand.url, '_blank');
         });
     }
@@ -565,7 +590,12 @@
     function askQuestion() {
         if (!adActive || !penguinVisible || questionActive || cooldown || waitingForNext) return;
         if (correctCount >= REQUIRED_CORRECT) return;
-        const q = QUESTIONS[currentVideo.brand][Math.floor(Math.random() * QUESTIONS[currentVideo.brand].length)];
+        // 如果池子空了（理论上不会，因为最多答3题且每题移除），重新填充
+        if (currentQuestionPool.length === 0) {
+            currentQuestionPool = JSON.parse(JSON.stringify(QUESTIONS[currentBrandIndex]));
+        }
+        const randomIndex = Math.floor(Math.random() * currentQuestionPool.length);
+        const q = currentQuestionPool.splice(randomIndex, 1)[0]; // 移除该题
         showBubble(`🐧 第${correctCount+1}/3题：${q.q}`, true, q);
     }
 
@@ -587,7 +617,7 @@
     function handleAnswer(sel, qData) {
         if (!adActive) return;
         const isCorrect = sel === qData.correct;
-        const brand = currentVideo.brand;
+        const brand = currentBrandIndex;
         brandStats[brand].total++;
         if (isCorrect) brandStats[brand].correct++;
         document.getElementById('penguinBubbleArea').innerHTML = ''; questionActive = false;
@@ -688,14 +718,14 @@
     window.sendAiMessage = function() { const input = document.getElementById('aiChatInput'); const text = input.value.trim(); if (!text) return; addAiMsg('user', text); input.value = ''; generateAiReply(text); };
     window.sendQuickMsg = function(text) { addAiMsg('user', text); generateAiReply(text); };
     function generateAiReply(text) {
-        const b = BRANDS[currentVideo.brand]; let reply = '';
+        const b = BRANDS[currentBrandIndex]; let reply = '';
         const lower = text.toLowerCase();
         if (lower.includes('笑话') || lower.includes('搞笑') || lower.includes('好玩')) reply = AI_KNOWLEDGE.jokes[Math.floor(Math.random() * AI_KNOWLEDGE.jokes.length)];
-        else if (lower.includes('价格') || lower.includes('多少钱') || lower.includes('贵')) reply = AI_KNOWLEDGE.general['价格'][currentVideo.brand] + ' 不过具体价格以官方为准哦~';
-        else if (lower.includes('场景') || lower.includes('适合') || lower.includes('什么时候')) reply = '这个产品适合：' + AI_KNOWLEDGE.general['场景'][currentVideo.brand];
-        else if (lower.includes('特点') || lower.includes('优势') || lower.includes('竞品') || lower.includes('对比')) reply = b.name + '的核心特点是：' + AI_KNOWLEDGE.general['特点'][currentVideo.brand] + '。不过我建议你亲自体验一下~';
+        else if (lower.includes('价格') || lower.includes('多少钱') || lower.includes('贵')) reply = AI_KNOWLEDGE.general['价格'][currentBrandIndex] + ' 不过具体价格以官方为准哦~';
+        else if (lower.includes('场景') || lower.includes('适合') || lower.includes('什么时候')) reply = '这个产品适合：' + AI_KNOWLEDGE.general['场景'][currentBrandIndex];
+        else if (lower.includes('特点') || lower.includes('优势') || lower.includes('竞品') || lower.includes('对比')) reply = b.name + '的核心特点是：' + AI_KNOWLEDGE.general['特点'][currentBrandIndex] + '。不过我建议你亲自体验一下~';
         else if (lower.includes('天气') || lower.includes('你好') || lower.includes('嗨') || lower.includes('聊天')) reply = AI_KNOWLEDGE.chitchat[Math.floor(Math.random() * AI_KNOWLEDGE.chitchat.length)];
-        else if (lower.includes('品牌') || lower.includes('介绍')) reply = `${b.name}——${b.slogan.replace('<br>',' ')}。${AI_KNOWLEDGE.general['特点'][currentVideo.brand]}。`;
+        else if (lower.includes('品牌') || lower.includes('介绍')) reply = `${b.name}——${b.slogan.replace('<br>',' ')}。${AI_KNOWLEDGE.general['特点'][currentBrandIndex]}。`;
         else reply = `关于"${text}"，我可能不太了解。不过我可以聊聊产品场景、特点，或者给你讲个笑话~ 你也可以试试问我"讲个笑话"😄`;
         setTimeout(() => addAiMsg('ai', reply), 500);
     }
