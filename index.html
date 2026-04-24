@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>光影剧场 · 广告优化平台</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0a0a0a; color: #e0e0e0; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .platform { width: 100%; max-width: 1400px; height: 100vh; background: #111; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 0 1px #333; }
+        .nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #0d0d0d; border-bottom: 1px solid #2a2a2a; flex-shrink: 0; }
+        .nav-left { display: flex; align-items: center; gap: 30px; }
+        .nav-logo { font-size: 24px; font-weight: 700; letter-spacing: 4px; color: #fff; }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-link { color: #999; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        .nav-link:hover, .nav-link.active { color: #fff; }
+        .nav-right { display: flex; align-items: center; gap: 20px; }
+        .back-btn { background: #1a1a1a; border: 1px solid #444; color: #ccc; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s; display: none; }
+        .back-btn:hover { background: #2a2a2a; color: #fff; }
+        .back-btn.visible { display: block; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #2a2a2a; border: 1px solid #555; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 18px; }
+        .user-avatar:hover { background: #3a3a3a; border-color: #fff; }
+        .main-content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        .home-page { padding: 30px 40px; display: block; }
+        .home-page.hidden { display: none; }
+        .section-title { font-size: 22px; font-weight: 600; margin-bottom: 20px; color: #fff; }
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; }
+        .video-card { background: #1a1a1a; border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid #2a2a2a; transition: 0.2s; position: relative; }
+        .video-card:hover { border-color: #555; transform: translateY(-2px); }
+        .video-thumb { width: 100%; aspect-ratio: 16/10; background: #222; display: flex; align-items: center; justify-content: center; font-size: 48px; position: relative; }
+        .video-info { padding: 14px 16px; }
+        .video-info h3 { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+        .video-info .meta { font-size: 13px; color: #888; display: flex; gap: 12px; }
+        .ad-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #ffcc00; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 1px solid rgba(255,204,0,0.4); }
+        .pref-tag { position: absolute; top: 8px; left: 8px; background: #fff; color: #000; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+        .detail-page { padding: 30px 40px; display: none; }
+        .detail-page.visible { display: block; }
+        .detail-hero { display: flex; gap: 30px; margin-bottom: 30px; }
+        .detail-thumb { width: 280px; aspect-ratio: 16/10; background: #222; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 72px; flex-shrink: 0; border: 1px solid #333; }
+        .detail-meta h2 { font-size: 28px; font-weight: 700; margin-bottom: 12px; color: #fff; }
+        .detail-meta .info-row { display: flex; gap: 20px; color: #999; font-size: 14px; margin-bottom: 15px; }
+        .detail-meta .desc { color: #aaa; font-size: 14px; line-height: 1.6; max-width: 500px; }
+        .episode-section { margin-top: 30px; }
+        .episode-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        .episode-btn { background: #1a1a1a; border: 1px solid #333; color: #ccc; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .episode-btn:hover { background: #2a2a2a; border-color: #fff; color: #fff; }
+        .episode-btn.current { background: #fff; color: #000; border-color: #fff; font-weight: 600; }
+        .player-page { display: none; flex-direction: column; height: 100%; }
+        .player-page.visible { display: flex; }
+        .player-area { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; position: relative; min-height: 400px; }
+        .ad-layer { position: absolute; inset: 0; background-size: cover; background-position: center; display: none; flex-direction: column; z-index: 10; }
+        .ad-layer.active { display: flex; }
+        .ad-layer::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.5) 100%); pointer-events: none; }
+        .ad-brand-info { position: relative; z-index: 2; padding: 30px 40px; pointer-events: none; }
+        .ad-brand-info .brand-name { font-size: 22px; font-weight: 600; letter-spacing: 6px; color: rgba(255,255,255,0.8); text-transform: uppercase; }
+        .ad-brand-info .brand-slogan { font-size: 48px; font-weight: 800; color: #fff; max-width: 600px; margin-top: 10px; }
+        .ad-timer-display { position: absolute; top: 30px; right: 40px; z-index: 5; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 10px 24px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.3); color: #fff; font-size: 20px; font-weight: 600; letter-spacing: 1px; pointer-events: none; }
+        .penguin-widget { position: absolute; bottom: 20px; right: 30px; z-index: 20; display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; }
+        .penguin-bubble-area { display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 8px; pointer-events: none; min-height: 50px; }
+        .penguin-bubble { background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); padding: 12px 18px; border-radius: 20px 20px 4px 20px; max-width: 260px; box-shadow: 0 6px 0 #ccc, 0 8px 20px rgba(0,0,0,0.3); border: 1px solid #ddd; margin-bottom: 6px; font-weight: 500; color: #111; font-size: 15px; animation: bubblePop 0.3s ease-out; pointer-events: auto; }
+        @keyframes bubblePop { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .quiz-opts { display: flex; gap: 8px; margin-top: 4px; pointer-events: auto; }
+        .quiz-opt { background: #f0f0f0; border: 2px solid #ccc; border-radius: 30px; padding: 8px 16px; font-size: 14px; font-weight: 600; color: #111; cursor: pointer; box-shadow: 0 3px 0 #bbb; transition: 0.05s; }
+        .quiz-opt:active { transform: translateY(2px); box-shadow: 0 1px 0 #bbb; }
+        .next-question-btn { background: #111; color: #fff; border: none; border-radius: 30px; padding: 10px 24px; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 6px; pointer-events: auto; }
+        .penguin-body-wrapper { width: 120px; height: 140px; pointer-events: auto; cursor: pointer; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); }
+        .qq-body { width: 100%; height: 100%; background: #1a1c22; border-radius: 55% 55% 48% 48%; position: relative; border: 2px solid #333; box-shadow: inset 0 -6px 0 #0f1114, 0 8px 0 #0a0f14; }
+        .qq-belly { position: absolute; bottom: 15px; left: 22px; width: 76px; height: 70px; background: #f5f5f5; border-radius: 50% 50% 42% 42%; }
+        .qq-eyes { position: absolute; top: 32px; left: 14px; right: 14px; display: flex; justify-content: space-around; }
+        .qq-eye { width: 28px; height: 34px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+        .qq-pupil { width: 14px; height: 18px; background: #111; border-radius: 50%; position: relative; }
+        .qq-pupil::after { content: ''; position: absolute; top: 2px; left: 3px; width: 5px; height: 5px; background: white; border-radius: 50%; opacity: 0.7; }
+        .qq-scarf { position: absolute; bottom: 20px; left: 0; right: 0; height: 22px; background: #c92a2a; border-radius: 15px 15px 8px 8px; z-index: 3; box-shadow: 0 3px 0 #8f1e1e; }
+        .qq-beak { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); width: 18px; height: 12px; background: #e09d32; border-radius: 0 0 50% 50%; z-index: 4; }
+        .qq-feet { position: absolute; bottom: -10px; left: 14px; right: 14px; display: flex; justify-content: space-between; }
+        .qq-foot { width: 28px; height: 16px; background: #e09d32; border-radius: 50% 50% 30% 30%; box-shadow: 0 4px 0 #a06f1e; }
+        .penguin-name-tag { text-align: center; color: #fff; font-weight: 600; margin-top: 6px; font-size: 13px; }
+        .penguin-stats-bar { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 20px; margin-top: 4px; opacity: 0; transition: 0.2s; font-size: 11px; color: #ccc; border: 1px solid rgba(255,255,255,0.2); }
+        .penguin-body-wrapper:hover .penguin-stats-bar { opacity: 1; }
+        .penguin-stats-bar .level-badge { background: #fff; color: #000; padding: 2px 8px; border-radius: 10px; font-weight: 700; font-size: 10px; }
+        .penguin-stats-bar .progress-mini { width: 50px; height: 3px; background: #333; border-radius: 5px; overflow: hidden; }
+        .penguin-stats-bar .progress-mini-fill { height: 100%; background: #fff; border-radius: 5px; transition: 0.3s; }
+        .ai-chat-panel { position: absolute; bottom: 100px; left: 40px; z-index: 25; display: none; flex-direction: column; background: rgba(20,20,20,0.95); backdrop-filter: blur(10px); border-radius: 16px; padding: 20px; width: 360px; max-height: 350px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .ai-chat-panel.open { display: flex; }
+        .ai-chat-panel .chat-title { font-size: 13px; color: #999; margin-bottom: 10px; letter-spacing: 1px; text-transform: uppercase; }
+        .ai-chat-panel .chat-messages { flex: 1; overflow-y: auto; max-height: 220px; margin-bottom: 10px; font-size: 13px; }
+        .ai-chat-panel .chat-msg { padding: 8px 12px; border-radius: 12px; margin-bottom: 8px; line-height: 1.5; }
+        .ai-chat-panel .chat-msg.user { background: #333; color: #fff; text-align: right; }
+        .ai-chat-panel .chat-msg.ai { background: #f0f0f0; color: #111; }
+        .ai-chat-panel .quick-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+        .ai-chat-panel .quick-action { background: #1a1a1a; border: 1px solid #444; color: #ccc; padding: 6px 14px; border-radius: 16px; cursor: pointer; font-size: 12px; transition: 0.1s; }
+        .ai-chat-panel .quick-action:hover { background: #2a2a2a; color: #fff; }
+        .ai-chat-panel .chat-input-area { display: flex; gap: 6px; }
+        .ai-chat-panel input { flex: 1; background: #1a1a1a; border: 1px solid #555; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none; }
+        .ai-chat-panel button { background: #fff; color: #000; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; }
+        .ad-click-area { position: absolute; bottom: 80px; left: 40px; z-index: 15; background: rgba(255,255,255,0.1); backdrop-filter: blur(4px); padding: 8px 20px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.3); cursor: pointer; color: #fff; font-size: 13px; font-weight: 500; transition: 0.2s; }
+        .ad-click-area:hover { background: rgba(255,255,255,0.2); }
+        .speed-badge { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 15; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.3); display: flex; gap: 8px; }
+        .speed-btn { color: #aaa; cursor: pointer; font-size: 13px; font-weight: 500; padding: 2px 8px; border-radius: 10px; transition: 0.1s; }
+        .speed-btn.active { color: #fff; background: rgba(255,255,255,0.2); font-weight: 600; }
+        .speed-btn:hover { color: #fff; }
+        .watch-progress-container { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: #333; z-index: 20; }
+        .watch-progress-fill { height: 100%; background: #fff; transition: width 0.1s linear; }
+        .user-center-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 200; opacity: 0; pointer-events: none; transition: 0.3s; }
+        .user-center-overlay.show { opacity: 1; pointer-events: auto; }
+        .user-center-panel { background: rgba(20, 20, 20, 0.98); backdrop-filter: blur(25px); border-radius: 24px; padding: 30px; max-width: 500px; width: 85vw; max-height: 80vh; overflow-y: auto; border: 1px solid #444; box-shadow: 0 20px 40px rgba(0,0,0,0.7); }
+        .user-center-panel h3 { color: #fff; font-size: 22px; margin-bottom: 10px; text-align: center; }
+        .user-center-panel .panel-subtitle { color: #888; font-size: 13px; text-align: center; margin-bottom: 20px; }
+        .user-center-panel .stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2a2a2a; color: #ccc; font-size: 15px; }
+        .user-center-panel .stat-row span:last-child { font-weight: 600; color: #fff; }
+        .user-center-panel .progress-bg { height: 8px; background: #2a2a2a; border-radius: 10px; margin: 10px 0; overflow: hidden; }
+        .user-center-panel .progress-fill { height: 100%; background: #fff; border-radius: 10px; transition: 0.3s; }
+        .user-center-panel .section-title-sm { font-size: 16px; font-weight: 600; color: #fff; margin: 20px 0 12px; }
+        .user-center-panel .shop-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #1a1a1a; border-radius: 12px; margin-bottom: 8px; border: 1px solid #2a2a2a; }
+        .user-center-panel .shop-item .item-name { color: #fff; font-weight: 500; }
+        .user-center-panel .shop-item .item-cost { color: #888; font-size: 13px; }
+        .user-center-panel .shop-item .buy-btn { background: #fff; color: #000; border: none; padding: 6px 16px; border-radius: 16px; font-weight: 600; font-size: 12px; cursor: pointer; transition: 0.1s; }
+        .user-center-panel .shop-item .buy-btn.owned { background: #333; color: #888; cursor: default; }
+        .user-center-panel .shop-item .buy-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .close-panel-btn { background: transparent; border: 1px solid #fff; color: #fff; padding: 10px 30px; border-radius: 20px; margin-top: 20px; font-weight: 600; cursor: pointer; width: 100%; }
+        .close-panel-btn:hover { background: #fff; color: #000; }
+    </style>
+</head>
+<body>
+<div class="platform">
+    <div class="nav-bar">
+        <div class="nav-left">
+            <div class="nav-logo">光影剧场</div>
+            <div class="nav-links">
+                <span class="nav-link active" onclick="goHome()">首页</span>
+                <span class="nav-link">片库</span>
+            </div>
+        </div>
+        <div class="nav-right">
+            <button class="back-btn" id="backBtn" onclick="goBack()">← 返回</button>
+            <div class="user-avatar" id="userAvatar" onclick="openUserCenter()" title="用户中心">🐧</div>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="home-page" id="homePage"><div class="section-title">🔥 热播推荐</div><div class="video-grid" id="videoGrid"></div></div>
+        <div class="detail-page" id="detailPage"></div>
+        <div class="player-page" id="playerPage">
+            <div class="player-area" id="playerArea">
+                <div class="ad-layer" id="adLayer">
+                    <div class="ad-brand-info"><div class="brand-name" id="adBrandName"></div><div class="brand-slogan" id="adBrandSlogan"></div></div>
+                    <div class="ad-timer-display" id="adTimerDisplay">02:00</div>
+                    <div class="ad-click-area" onclick="toggleAiChat()">💬 咨询品牌</div>
+                    <div class="ai-chat-panel" id="aiChatPanel">
+                        <div class="chat-title">品牌顾问 · 随便聊聊</div>
+                        <div class="chat-messages" id="aiChatMessages"></div>
+                        <div class="quick-actions">
+                            <span class="quick-action" onclick="sendQuickMsg('讲个笑话')">😂 讲个笑话</span>
+                            <span class="quick-action" onclick="sendQuickMsg('这个产品适合什么场景')">📍 适用场景</span>
+                            <span class="quick-action" onclick="sendQuickMsg('和竞品比有什么特点')">🔍 竞品对比</span>
+                            <span class="quick-action" onclick="sendQuickMsg('今天天气不错')">☀️ 闲聊一下</span>
+                        </div>
+                        <div class="chat-input-area"><input type="text" id="aiChatInput" placeholder="随便问，我不推销..." onkeypress="if(event.key==='Enter')sendAiMessage()"><button onclick="sendAiMessage()">发送</button></div>
+                    </div>
+                    <div class="penguin-widget">
+                        <div class="penguin-bubble-area" id="penguinBubbleArea"></div>
+                        <div class="penguin-body-wrapper" id="penguinBodyWrapper">
+                            <div class="qq-body"><div class="qq-belly"></div><div class="qq-eyes"><div class="qq-eye"><div class="qq-pupil"></div></div><div class="qq-eye"><div class="qq-pupil"></div></div></div><div class="qq-scarf"></div><div class="qq-beak"></div></div>
+                            <div class="qq-feet"><div class="qq-foot"></div><div class="qq-foot"></div></div>
+                        </div>
+                        <div class="penguin-name-tag">小Q · Lv.<span id="penguinLevelNum">1</span></div>
+                        <div class="penguin-stats-bar"><span class="level-badge">Lv.<span id="statsLevel">1</span></span><span>❤️<span id="statsIntimacy">0</span></span><div class="progress-mini"><div class="progress-mini-fill" id="statsProgressFill" style="width:0%"></div></div></div>
+                    </div>
+                    <div class="speed-badge"><span class="speed-btn" data-speed="1" onclick="setSpeed(1)">1x</span><span class="speed-btn active" data-speed="2" onclick="setSpeed(2)">2x</span></div>
+                </div>
+                <div class="watch-progress-container" id="watchProgressContainer" style="display:none;"><div class="watch-progress-fill" id="watchProgressFill" style="width:0%"></div></div>
+                <div class="user-center-overlay" id="userCenterOverlay">
+                    <div class="user-center-panel">
+                        <h3>🐧 小Q养成系统</h3>
+                        <div class="panel-subtitle">用户中心 · 点击头像或双击企鹅打开</div>
+                        <div class="stat-row"><span>等级</span><span id="panelLevel">Lv.1</span></div>
+                        <div class="stat-row"><span>经验值</span><span id="panelExp">0 / 100</span></div>
+                        <div class="progress-bg"><div class="progress-fill" id="panelExpBar" style="width:0%"></div></div>
+                        <div class="stat-row"><span>亲密度</span><span>❤️ <span id="panelIntimacy">0</span></span></div>
+                        <div class="stat-row"><span>🎬 累计观影时长</span><span id="panelWatchTime">0 秒</span></div>
+                        <div class="stat-row"><span>可用时长积分</span><span id="panelTimePoints">0 分</span></div>
+                        <div class="section-title-sm">🛍️ 观影时长兑换商店</div>
+                        <div id="shopList"></div>
+                        <button class="close-panel-btn" onclick="document.getElementById('userCenterOverlay').classList.remove('show')">关闭面板</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    const VIDEOS = [
+        { id: 1, title: '逐玉', thumb: '🎬', rating: '8.9', eps: 24, desc: '古装仙侠大剧，张凌赫田曦薇主演。', brand: 0 },
+        { id: 2, title: '冰湖重生', thumb: '❄️', rating: '8.5', eps: 18, desc: '重生逆袭，虐恋升级。', brand: 1 },
+        { id: 3, title: '锦绣安宁', thumb: '🏮', rating: '8.7', eps: 30, desc: '宅斗权谋，步步为营。', brand: 2 },
+        { id: 4, title: '大奉打更人', thumb: '⚔️', rating: '9.0', eps: 36, desc: '穿越探案，玄幻巨制。', brand: 0 },
+        { id: 5, title: '陷入我们的热恋', thumb: '💕', rating: '8.3', eps: 20, desc: '青春甜宠，耳东兔子原著。', brand: 1 },
+        { id: 6, title: '滤镜', thumb: '📸', rating: '8.1', eps: 16, desc: '现代奇幻，檀健次李兰迪。', brand: 2 },
+    ];
+    const BRANDS = [
+        { name: 'LAND ROVER', slogan: '去征服，所有不服。', bg: 'https://images.pexels.com/photos/100653/pexels-photo-100653.jpeg',
+          questions: [ { q: '路虎「Above & Beyond」意为？', optA: '永不言败', optB: '探索无尽', correct: 'B' }, { q: '路虎核心全地形技术？', optA: 'Terrain Response', optB: 'Quattro', correct: 'A' }, { q: '路虎诞生于？', optA: '英国', optB: '美国', correct: 'A' }, { q: '路虎卫士主打？', optA: '极致越野', optB: '城市通勤', correct: 'A' } ] },
+        { name: '优酸乳', slogan: '酸甜好滋味，青春不后悔。', bg: 'https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg',
+          questions: [ { q: '优酸乳主要口味？', optA: '草莓', optB: '蓝莓', correct: 'A' }, { q: '优酸乳属于？', optA: '伊利', optB: '蒙牛', correct: 'A' }, { q: '优酸乳品牌主张？', optA: '青春就要酸甜', optB: '健康每一天', correct: 'A' } ] },
+        { name: '可口可乐', slogan: 'Taste the Feeling，畅爽开怀。', bg: 'https://images.pexels.com/photos/2983101/pexels-photo-2983101.jpeg',
+          questions: [ { q: '可口可乐经典瓶身颜色？', optA: '红色', optB: '蓝色', correct: 'A' }, { q: '可口可乐诞生于？', optA: '1886年', optB: '1901年', correct: 'A' }, { q: '可口可乐英文是？', optA: 'Coca-Cola', optB: 'Pepsi', correct: 'A' } ] },
+    ];
+    const AI_KNOWLEDGE = {
+        jokes: ['为什么企鹅不怕冷？因为它们有"企"业文化！🐧','程序员去沙漠越野，说："这里全是沙盒环境！"','可口可乐和百事可乐打架，你猜谁赢了？——裁判说：都"气"消了。','路虎车主最怕什么？——油价上涨，因为油箱比游泳池还大。'],
+        general: {
+            '价格': {0:'路虎卫士起售价约79.8万元，揽胜约120万起。',1:'优酸乳单瓶约3-5元，整箱更优惠。',2:'可口可乐单罐约2-3元，性价比超高。'},
+            '场景': {0:'极限越野、沙漠穿越、城市豪华出行、户外探险。',1:'早餐搭配、下午茶、运动后饮用、朋友聚会。',2:'朋友聚会、佐餐搭配、夏日解暑、看剧必备。'},
+            '特点': {0:'Terrain Response全地形系统、豪华内饰、英伦血统。',1:'酸甜口感、含维生素C、青春品牌调性。',2:'经典配方、畅爽口感、全球最知名饮料品牌。'},
+        },
+        chitchat: ['今天天气不错，适合出去兜风！不过你得先看完广告~','你知道吗？企鹅是鸟类中游泳最快的！虽然我不会游泳...','我最近在追《逐玉》，超好看的！你也在追吗？','说实话，我觉得你答题的样子还挺帅的。','有人说广告很烦，但我觉得，有我在就不烦了对吧~']
+    };
+    const SHOP_ITEMS = [
+        { id: 'hat_landrover', name: '🚙 路虎帽子', cost: 50, desc: '戴上它，越野精神满满' },
+        { id: 'hat_yogurt', name: '🥛 优酸乳发卡', cost: 30, desc: '酸甜可爱的粉色发卡' },
+        { id: 'hat_coke', name: '🥤 可乐眼镜', cost: 40, desc: '红色潮流墨镜' },
+        { id: 'scarf_gold', name: '✨ 金色围巾', cost: 100, desc: '闪闪发光的升级围巾' },
+        { id: 'boots_red', name: '👢 小红靴', cost: 60, desc: '穿上它跳得更欢' },
+    ];
+    const REQUIRED_CORRECT = 3, COOLDOWN_SEC = 8;
+    const expPerLevel = [0, 100, 250, 500, 1000];
+
+    let currentVideo = null, currentEp = 1;
+    let adActive = false, adTimeLeft = 0, adTimer = null;
+    let penguinVisible = false, questionActive = false, cooldown = false, waitingForNext = false;
+    let correctCount = 0, combo = 0;
+    let watchTime = 0, timePoints = 0, playbackSpeed = 2, watchTimer = null;
+    let level = 1, intimacy = 0, exp = 0;
+    let clickTimer = null, waitingFirstQuestion = false;
+    let ownedItems = [];
+    let brandStats = { 0: { correct: 0, total: 0 }, 1: { correct: 0, total: 0 }, 2: { correct: 0, total: 0 } };
+    const PREFERENCE_PROBABILITY = 0.7;
+
+    function getUserPreferredBrand() {
+        let bestBrand = 0, bestRate = -1;
+        for (let i = 0; i < 3; i++) {
+            const s = brandStats[i];
+            if (s.total === 0) continue;
+            const rate = s.correct / s.total;
+            if (rate > bestRate) { bestRate = rate; bestBrand = i; }
+        }
+        return bestRate > 0 ? bestBrand : null;
+    }
+
+    function renderHome() {
+        document.getElementById('videoGrid').innerHTML = VIDEOS.map(v => {
+            const prefBrand = getUserPreferredBrand();
+            const isPref = prefBrand !== null && v.brand === prefBrand;
+            return `
+            <div class="video-card" onclick="openDetail(${v.id})">
+                <div class="video-thumb">${v.thumb}<span class="ad-badge">广告</span>${isPref ? '<span class="pref-tag">为你推荐</span>' : ''}</div>
+                <div class="video-info"><h3>${v.title}</h3><div class="meta"><span>⭐ ${v.rating}</span><span>${v.eps}集</span></div></div>
+            </div>`;
+        }).join('');
+    }
+
+    window.openDetail = function(id) {
+        const v = VIDEOS.find(x => x.id === id);
+        if (!v) return; currentVideo = v; currentEp = 1;
+        document.getElementById('homePage').classList.add('hidden');
+        const dp = document.getElementById('detailPage'); dp.classList.add('visible');
+        dp.innerHTML = `
+            <div class="detail-hero"><div class="detail-thumb">${v.thumb}</div><div class="detail-meta"><h2>${v.title}</h2><div class="info-row"><span>⭐ ${v.rating}</span><span>${v.eps}集</span></div><div class="desc">${v.desc}</div></div></div>
+            <div class="episode-section"><div class="section-title">剧集列表</div><div class="episode-grid">${Array.from({length:v.eps},(_,i)=>`<div class="episode-btn ${i===0?'current':''}" onclick="playEpisode(${i+1})">第${i+1}集</div>`).join('')}</div></div>`;
+        document.getElementById('backBtn').classList.add('visible');
+    };
+
+    window.playEpisode = function(ep) {
+        currentEp = ep;
+        document.getElementById('detailPage').classList.remove('visible');
+        document.getElementById('playerPage').classList.add('visible');
+        document.getElementById('backBtn').classList.add('visible');
+        resetAndStartAd();
+    };
+
+    window.goBack = function() {
+        document.getElementById('playerPage').classList.remove('visible');
+        document.getElementById('detailPage').classList.remove('visible');
+        document.getElementById('homePage').classList.remove('hidden');
+        document.getElementById('backBtn').classList.remove('visible');
+        document.getElementById('userCenterOverlay').classList.remove('show');
+        stopAllTimers();
+        document.getElementById('adLayer').classList.remove('active');
+    };
+    window.goHome = () => goBack();
+
+    function stopAllTimers() {
+        if (adTimer) clearInterval(adTimer);
+        if (watchTimer) clearInterval(watchTimer);
+        adActive = false;
+    }
+
+    function resetAndStartAd() {
+        stopAllTimers();
+        adActive = false;
+        penguinVisible = false;
+        questionActive = false;
+        cooldown = false;
+        waitingForNext = false;
+        waitingFirstQuestion = false;
+        correctCount = 0;
+        combo = 0;
+        document.getElementById('penguinBubbleArea').innerHTML = '';
+        const pw = document.getElementById('penguinBodyWrapper');
+        // 直接隐藏企鹅，移除动画
+        pw.style.transition = 'none';
+        pw.style.transform = 'translateY(150px)';
+        pw.style.opacity = '0';
+        document.getElementById('adLayer').classList.remove('active');
+        document.getElementById('aiChatPanel').classList.remove('open');
+        document.getElementById('watchProgressContainer').style.display = 'none';
+        document.getElementById('watchProgressFill').style.width = '0%';
+        watchTime = 0;
+        setTimeout(() => {
+            document.getElementById('adLayer').classList.add('active');
+            pw.style.transition = 'none'; // 无动画，直接出现
+            startAd();
+        }, 30);
+    }
+
+    function startAd() {
+        let brandIndex = currentVideo.brand;
+        const prefBrand = getUserPreferredBrand();
+        if (prefBrand !== null && Math.random() < PREFERENCE_PROBABILITY) {
+            brandIndex = prefBrand;
+        }
+        const b = BRANDS[brandIndex];
+        document.getElementById('adBrandName').textContent = b.name;
+        document.getElementById('adBrandSlogan').textContent = b.slogan;
+        document.getElementById('adLayer').style.backgroundImage = `url('${b.bg}')`;
+        document.getElementById('adTimerDisplay').textContent = '02:00';
+        adTimeLeft = 120;
+        adActive = true;
+        adTimer = setInterval(() => {
+            if (!adActive) return;
+            adTimeLeft--;
+            document.getElementById('adTimerDisplay').textContent = formatTime(adTimeLeft);
+            if (!penguinVisible && adTimeLeft <= 115) showPenguin();
+            if (adTimeLeft <= 0) { stopAd(); startWatch(); }
+        }, 1000);
+    }
+
+    function stopAd() { adActive = false; clearInterval(adTimer); document.getElementById('adLayer').classList.remove('active'); document.getElementById('aiChatPanel').classList.remove('open'); }
+
+    function showPenguin() {
+        const pw = document.getElementById('penguinBodyWrapper');
+        // 直接显示，不带动画
+        pw.style.transition = 'none';
+        pw.style.transform = 'translateY(0)';
+        pw.style.opacity = '1';
+        penguinVisible = true;
+        waitingFirstQuestion = true;
+        showBubble('👋 嗨！答对3题跳过广告～双击我查看养成系统！');
+        setTimeout(() => {
+            waitingFirstQuestion = false;
+            if (adActive) askQuestion();
+        }, 1500);
+    }
+
+    function askQuestion() {
+        if (!adActive || !penguinVisible || questionActive || cooldown || waitingForNext) return;
+        if (correctCount >= REQUIRED_CORRECT) return;
+        const b = BRANDS[currentVideo.brand];
+        const q = b.questions[Math.floor(Math.random() * b.questions.length)];
+        showBubble(`🐧 第${correctCount+1}/3题：${q.q}`, true, q);
+    }
+
+    function showBubble(text, isQ = false, qData = null) {
+        const area = document.getElementById('penguinBubbleArea'); area.innerHTML = '';
+        const div = document.createElement('div'); div.className = 'penguin-bubble'; div.textContent = text; area.appendChild(div);
+        if (isQ && qData) {
+            questionActive = true;
+            const opts = document.createElement('div'); opts.className = 'quiz-opts';
+            ['A','B'].forEach(o => {
+                const btn = document.createElement('div'); btn.className = 'quiz-opt';
+                btn.textContent = `${o}. ${qData['opt'+o]}`;
+                btn.onclick = () => handleAnswer(o, qData); opts.appendChild(btn);
+            });
+            area.appendChild(opts);
+        }
+    }
+
+    function handleAnswer(sel, qData) {
+        if (!adActive) return;
+        const isCorrect = sel === qData.correct;
+        const brand = currentVideo.brand;
+        brandStats[brand].total++;
+        if (isCorrect) brandStats[brand].correct++;
+        document.getElementById('penguinBubbleArea').innerHTML = ''; questionActive = false;
+        if (isCorrect) {
+            correctCount++; combo++;
+            exp += 20 + combo*2; intimacy += 3;
+            while (level < expPerLevel.length-1 && exp >= expPerLevel[level]) level++;
+            updateStats();
+            showBubble(`🎉 答对！( ${correctCount}/${REQUIRED_CORRECT} )`);
+            if (correctCount >= REQUIRED_CORRECT) { showBubble('🏆 通关！进入观影...'); setTimeout(() => { stopAd(); startWatch(); }, 1500); }
+            else showNextButton();
+        } else {
+            combo = 0;
+            showBubble(`🤔 答案是 ${qData.correct} (${correctCount}/${REQUIRED_CORRECT})`);
+            startCooldown();
+        }
+    }
+
+    function showNextButton() {
+        waitingForNext = true;
+        const area = document.getElementById('penguinBubbleArea');
+        const btn = document.createElement('div'); btn.className = 'next-question-btn'; btn.textContent = '👉 下一题';
+        btn.onclick = () => { area.innerHTML = ''; waitingForNext = false; askQuestion(); };
+        area.appendChild(btn);
+    }
+
+    function startCooldown() {
+        cooldown = true; let left = COOLDOWN_SEC;
+        const area = document.getElementById('penguinBubbleArea');
+        const msg = document.createElement('div'); msg.className = 'penguin-bubble'; msg.textContent = `⏳ 等等… ${left}s`; area.appendChild(msg);
+        const t = setInterval(() => {
+            left--; if (left <= 0) { clearInterval(t); msg.remove(); cooldown = false; if (adActive && correctCount < REQUIRED_CORRECT) askQuestion(); }
+            else msg.textContent = `⏳ 等等… ${left}s`;
+        }, 1000);
+    }
+
+    function updateStats() {
+        document.getElementById('penguinLevelNum').textContent = level; document.getElementById('statsLevel').textContent = level;
+        document.getElementById('statsIntimacy').textContent = intimacy;
+        const curExp = expPerLevel[level-1]||0, nextExp = expPerLevel[level]||999;
+        document.getElementById('statsProgressFill').style.width = Math.min(100, ((exp-curExp)/(nextExp-curExp))*100) + '%';
+        document.getElementById('panelLevel').textContent = 'Lv.' + level;
+        document.getElementById('panelExp').textContent = exp + ' / ' + nextExp;
+        document.getElementById('panelExpBar').style.width = Math.min(100, ((exp-curExp)/(nextExp-curExp))*100) + '%';
+        document.getElementById('panelIntimacy').textContent = intimacy;
+        document.getElementById('panelWatchTime').textContent = formatWatchTime(watchTime);
+        document.getElementById('panelTimePoints').textContent = timePoints + ' 分';
+        renderShop();
+    }
+
+    function formatWatchTime(sec) { if (sec < 60) return sec + ' 秒'; const m = Math.floor(sec/60), s = sec%60; return m + ' 分 ' + s + ' 秒'; }
+    function renderShop() {
+        const shop = document.getElementById('shopList');
+        shop.innerHTML = SHOP_ITEMS.map(item => {
+            const owned = ownedItems.includes(item.id);
+            const canBuy = timePoints >= item.cost && !owned;
+            return `<div class="shop-item"><div><div class="item-name">${item.name}</div><div class="item-cost">${item.desc} · ${item.cost} 分</div></div>
+                <button class="buy-btn ${owned?'owned':''}" ${canBuy?'':'disabled'} onclick="buyItem('${item.id}', ${item.cost})">${owned?'已拥有':'兑换'}</button></div>`;
+        }).join('');
+    }
+    window.buyItem = function(id, cost) { if (timePoints >= cost && !ownedItems.includes(id)) { timePoints -= cost; ownedItems.push(id); updateStats(); showBubble('🛍️ 兑换成功！双击企鹅查看~'); } };
+
+    function startWatch() {
+        document.getElementById('watchProgressContainer').style.display = 'block';
+        document.getElementById('watchProgressFill').style.width = '0%'; watchTime = 0;
+        const totalWatch = 120;
+        watchTimer = setInterval(() => {
+            watchTime += playbackSpeed;
+            timePoints += playbackSpeed;
+            const pct = Math.min(100, (watchTime / totalWatch) * 100);
+            document.getElementById('watchProgressFill').style.width = pct + '%';
+            if (watchTime % 10 < playbackSpeed) { exp += 5; updateStats(); }
+            if (pct >= 100) { clearInterval(watchTimer); watchTimer = null; }
+        }, 1000);
+    }
+    window.setSpeed = function(sp) { playbackSpeed = sp; document.querySelectorAll('.speed-btn').forEach(b => b.classList.toggle('active', b.dataset.speed == sp)); };
+
+    // AI 对话
+    window.toggleAiChat = function() {
+        const panel = document.getElementById('aiChatPanel');
+        panel.classList.toggle('open');
+        if (panel.classList.contains('open') && document.getElementById('aiChatMessages').children.length === 0) {
+            addAiMsg('ai', '你好！我是品牌顾问，不是推销员。你可以问我产品问题、让我讲笑话，或者随便聊聊~ 😊');
+        }
+    };
+    window.sendAiMessage = function() { const input = document.getElementById('aiChatInput'); const text = input.value.trim(); if (!text) return; addAiMsg('user', text); input.value = ''; generateAiReply(text); };
+    window.sendQuickMsg = function(text) { addAiMsg('user', text); generateAiReply(text); };
+
+    function generateAiReply(text) {
+        const b = BRANDS[currentVideo.brand];
+        let reply = '';
+        const lower = text.toLowerCase();
+        if (lower.includes('笑话') || lower.includes('搞笑') || lower.includes('好玩')) {
+            reply = AI_KNOWLEDGE.jokes[Math.floor(Math.random() * AI_KNOWLEDGE.jokes.length)];
+        } else if (lower.includes('价格') || lower.includes('多少钱') || lower.includes('贵')) {
+            reply = AI_KNOWLEDGE.general['价格'][currentVideo.brand] + ' 不过具体价格以官方为准哦~';
+        } else if (lower.includes('场景') || lower.includes('适合') || lower.includes('什么时候')) {
+            reply = '这个产品适合：' + AI_KNOWLEDGE.general['场景'][currentVideo.brand];
+        } else if (lower.includes('特点') || lower.includes('优势') || lower.includes('竞品') || lower.includes('对比')) {
+            reply = b.name + '的核心特点是：' + AI_KNOWLEDGE.general['特点'][currentVideo.brand] + '。不过我建议你亲自体验一下~';
+        } else if (lower.includes('天气') || lower.includes('你好') || lower.includes('嗨') || lower.includes('聊天')) {
+            reply = AI_KNOWLEDGE.chitchat[Math.floor(Math.random() * AI_KNOWLEDGE.chitchat.length)];
+        } else if (lower.includes('品牌') || lower.includes('介绍')) {
+            reply = `${b.name}——${b.slogan.replace('<br>',' ')}。${AI_KNOWLEDGE.general['特点'][currentVideo.brand]}。`;
+        } else {
+            reply = `关于"${text}"，我可能不太了解。不过我可以聊聊产品场景、特点，或者给你讲个笑话~ 你也可以试试问我"讲个笑话"😄`;
+        }
+        setTimeout(() => addAiMsg('ai', reply), 500);
+    }
+
+    function addAiMsg(role, text) {
+        const msgs = document.getElementById('aiChatMessages');
+        const div = document.createElement('div'); div.className = `chat-msg ${role}`; div.textContent = text; msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    // 企鹅交互
+    const penguinBody = document.getElementById('penguinBodyWrapper');
+    penguinBody.addEventListener('click', (e) => {
+        if (waitingFirstQuestion) { showBubble('🐧 马上出题哦～'); return; }
+        if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; return; }
+        clickTimer = setTimeout(() => {
+            clickTimer = null;
+            if (!adActive || !penguinVisible || questionActive || cooldown || waitingForNext) return;
+            const lines = ['🚙 好酷','🥛 好喝','🥤 加冰','💪 加油','🌟 双击查看养成'];
+            showBubble(`💬 ${lines[Math.floor(Math.random()*lines.length)]}`); intimacy++; updateStats();
+        }, 250);
+    });
+    penguinBody.addEventListener('dblclick', () => {
+        if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; }
+        updateStats();
+        document.getElementById('userCenterOverlay').classList.add('show');
+    });
+
+    // 用户中心（头像点击）
+    window.openUserCenter = function() {
+        updateStats();
+        document.getElementById('userCenterOverlay').classList.add('show');
+    };
+
+    function formatTime(s) { const m = Math.floor(s/60), sec = s%60; return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; }
+
+    renderHome();
+})();
+</script>
+</body>
+</html>
