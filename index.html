@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>光影剧场 · 广告优化平台</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -56,7 +56,7 @@
         .ad-brand-info .brand-name { font-size: 22px; font-weight: 600; letter-spacing: 6px; color: rgba(255,255,255,0.8); text-transform: uppercase; }
         .ad-brand-info .brand-slogan { font-size: 48px; font-weight: 800; color: #fff; max-width: 600px; margin-top: 10px; }
         .ad-timer-display { position: absolute; top: 30px; right: 40px; z-index: 5; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 10px 24px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.3); color: #fff; font-size: 20px; font-weight: 600; letter-spacing: 1px; pointer-events: none; }
-        .penguin-widget { position: absolute; bottom: 20px; right: 30px; z-index: 20; display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; }
+        .penguin-safe-area { position: absolute; bottom: 20px; right: 30px; z-index: 30; display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; }
         .penguin-bubble-area { display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 8px; pointer-events: none; min-height: 50px; }
         .penguin-bubble { background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); padding: 12px 18px; border-radius: 20px 20px 4px 20px; max-width: 260px; box-shadow: 0 6px 0 #ccc, 0 8px 20px rgba(0,0,0,0.3); border: 1px solid #ddd; margin-bottom: 6px; font-weight: 500; color: #111; font-size: 15px; animation: bubblePop 0.3s ease-out; pointer-events: auto; }
         @keyframes bubblePop { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
@@ -81,6 +81,13 @@
         .penguin-stats-bar .level-badge { background: #fff; color: #000; padding: 2px 8px; border-radius: 10px; font-weight: 700; font-size: 10px; }
         .penguin-stats-bar .progress-mini { width: 50px; height: 3px; background: #333; border-radius: 5px; overflow: hidden; }
         .penguin-stats-bar .progress-mini-fill { height: 100%; background: #fff; border-radius: 5px; transition: 0.3s; }
+        .hat { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); width: 60px; height: 30px; display: none; z-index: 10; }
+        .hat.landrover { display: block; background: #2c3e4e; border-radius: 40% 40% 20% 20%; box-shadow: 0 4px 0 #1a2630; }
+        .hat.landrover::after { content: '🚙'; position: absolute; font-size: 16px; top: -10px; left: 50%; transform: translateX(-50%); }
+        .hat.yogurt { display: block; background: #f0a6c0; border-radius: 30% 30% 15% 15%; box-shadow: 0 4px 0 #c07890; }
+        .hat.yogurt::after { content: '🥛'; position: absolute; font-size: 14px; top: -8px; left: 50%; transform: translateX(-50%); }
+        .hat.coke { display: block; background: #e63946; border-radius: 20% 20% 10% 10%; box-shadow: 0 4px 0 #b0232e; }
+        .hat.coke::after { content: '🥤'; position: absolute; font-size: 14px; top: -8px; left: 50%; transform: translateX(-50%); }
         .ai-chat-panel { position: absolute; bottom: 100px; left: 40px; z-index: 25; display: none; flex-direction: column; background: rgba(20,20,20,0.95); backdrop-filter: blur(10px); border-radius: 16px; padding: 20px; width: 360px; max-height: 350px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .ai-chat-panel.open { display: flex; }
         .ai-chat-panel .chat-title { font-size: 13px; color: #999; margin-bottom: 10px; letter-spacing: 1px; text-transform: uppercase; }
@@ -120,6 +127,14 @@
         .user-center-panel .shop-item .buy-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .close-panel-btn { background: transparent; border: 1px solid #fff; color: #fff; padding: 10px 30px; border-radius: 20px; margin-top: 20px; font-weight: 600; cursor: pointer; width: 100%; }
         .close-panel-btn:hover { background: #fff; color: #000; }
+        .brand-link-hint { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: #ccc; padding: 6px 16px; border-radius: 20px; font-size: 12px; z-index: 15; pointer-events: none; transition: 0.3s; }
+        .dress-up-penguin { width: 120px; height: 140px; margin: 20px auto; position: relative; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); }
+        .dress-up-penguin .qq-body { position: relative; width: 100%; height: 100%; }
+        .dress-up-penguin .hat { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); width: 60px; height: 30px; display: none; z-index: 10; }
+        .dress-up-penguin .hat.active { display: block; }
+        .care-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
+        .care-btn { background: #2a2a2a; border: 1px solid #555; color: #ccc; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: 0.1s; }
+        .care-btn:hover { background: #3a3a3a; color: #fff; }
     </style>
 </head>
 <body>
@@ -145,6 +160,7 @@
                 <div class="ad-layer" id="adLayer">
                     <div class="ad-brand-info"><div class="brand-name" id="adBrandName"></div><div class="brand-slogan" id="adBrandSlogan"></div></div>
                     <div class="ad-timer-display" id="adTimerDisplay">02:00</div>
+                    <div class="brand-link-hint" id="brandLinkHint">点击画面任意位置前往品牌官网 ↗</div>
                     <div class="ad-click-area" onclick="toggleAiChat()">💬 咨询品牌</div>
                     <div class="ai-chat-panel" id="aiChatPanel">
                         <div class="chat-title">品牌顾问 · 随便聊聊</div>
@@ -157,11 +173,12 @@
                         </div>
                         <div class="chat-input-area"><input type="text" id="aiChatInput" placeholder="随便问，我不推销..." onkeypress="if(event.key==='Enter')sendAiMessage()"><button onclick="sendAiMessage()">发送</button></div>
                     </div>
-                    <div class="penguin-widget">
-                        <div class="penguin-bubble-area" id="penguinBubbleArea"></div>
-                        <div class="penguin-body-wrapper" id="penguinBodyWrapper">
+                    <div class="penguin-safe-area" id="penguinSafeArea" style="pointer-events:none;">
+                        <div class="penguin-bubble-area" id="penguinBubbleArea" style="pointer-events:none; min-height:50px;"></div>
+                        <div class="penguin-body-wrapper" id="penguinBodyWrapper" style="pointer-events:auto; cursor:pointer; filter:drop-shadow(0 10px 10px rgba(0,0,0,0.5));">
                             <div class="qq-body"><div class="qq-belly"></div><div class="qq-eyes"><div class="qq-eye"><div class="qq-pupil"></div></div><div class="qq-eye"><div class="qq-pupil"></div></div></div><div class="qq-scarf"></div><div class="qq-beak"></div></div>
                             <div class="qq-feet"><div class="qq-foot"></div><div class="qq-foot"></div></div>
+                            <div class="hat" id="penguinHat"></div>
                         </div>
                         <div class="penguin-name-tag">小Q · Lv.<span id="penguinLevelNum">1</span></div>
                         <div class="penguin-stats-bar"><span class="level-badge">Lv.<span id="statsLevel">1</span></span><span>❤️<span id="statsIntimacy">0</span></span><div class="progress-mini"><div class="progress-mini-fill" id="statsProgressFill" style="width:0%"></div></div></div>
@@ -171,17 +188,35 @@
                 <div class="watch-progress-container" id="watchProgressContainer" style="display:none;"><div class="watch-progress-fill" id="watchProgressFill" style="width:0%"></div></div>
                 <div class="user-center-overlay" id="userCenterOverlay">
                     <div class="user-center-panel">
-                        <h3>🐧 小Q养成系统</h3>
-                        <div class="panel-subtitle">用户中心 · 点击头像或双击企鹅打开</div>
+                        <h3>🐧 用户中心</h3>
+                        <div class="panel-subtitle">观影足迹 · 装备兑换</div>
                         <div class="stat-row"><span>等级</span><span id="panelLevel">Lv.1</span></div>
                         <div class="stat-row"><span>经验值</span><span id="panelExp">0 / 100</span></div>
                         <div class="progress-bg"><div class="progress-fill" id="panelExpBar" style="width:0%"></div></div>
                         <div class="stat-row"><span>亲密度</span><span>❤️ <span id="panelIntimacy">0</span></span></div>
                         <div class="stat-row"><span>🎬 累计观影时长</span><span id="panelWatchTime">0 秒</span></div>
                         <div class="stat-row"><span>可用时长积分</span><span id="panelTimePoints">0 分</span></div>
+                        <div class="stat-row"><span>📊 品牌偏好</span><span id="panelPrefBrand">--</span></div>
                         <div class="section-title-sm">🛍️ 观影时长兑换商店</div>
                         <div id="shopList"></div>
                         <button class="close-panel-btn" onclick="document.getElementById('userCenterOverlay').classList.remove('show')">关闭面板</button>
+                    </div>
+                </div>
+                <div class="user-center-overlay" id="dressUpOverlay">
+                    <div class="user-center-panel">
+                        <h3>🐧 小Q装扮与养成</h3>
+                        <div class="panel-subtitle">双击企鹅打开 · 单击关闭</div>
+                        <div class="dress-up-penguin" id="dressUpPenguin">
+                            <div class="qq-body"><div class="qq-belly"></div><div class="qq-eyes"><div class="qq-eye"><div class="qq-pupil"></div></div><div class="qq-eye"><div class="qq-pupil"></div></div></div><div class="qq-scarf"></div><div class="qq-beak"></div></div>
+                            <div class="qq-feet" style="position:absolute; bottom:-10px; left:14px; right:14px; display:flex; justify-content:space-between;"><div class="qq-foot"></div><div class="qq-foot"></div></div>
+                            <div class="hat" id="dressUpHat"></div>
+                        </div>
+                        <div id="dressUpList"></div>
+                        <div class="care-buttons">
+                            <div class="care-btn" onclick="feedPenguin()">🍞 喂食 (+5亲密度)</div>
+                            <div class="care-btn" onclick="bathePenguin()">🛁 洗澡 (+8亲密度)</div>
+                        </div>
+                        <button class="close-panel-btn" onclick="document.getElementById('dressUpOverlay').classList.remove('show')">关闭面板</button>
                     </div>
                 </div>
             </div>
@@ -199,14 +234,18 @@
         { id: 5, title: '陷入我们的热恋', thumb: '💕', rating: '8.3', eps: 20, desc: '青春甜宠，耳东兔子原著。', brand: 1 },
         { id: 6, title: '滤镜', thumb: '📸', rating: '8.1', eps: 16, desc: '现代奇幻，檀健次李兰迪。', brand: 2 },
     ];
+    // 修正品牌官网链接为真实可访问地址
     const BRANDS = [
-        { name: 'LAND ROVER', slogan: '去征服，所有不服。', bg: 'https://images.pexels.com/photos/100653/pexels-photo-100653.jpeg',
-          questions: [ { q: '路虎「Above & Beyond」意为？', optA: '永不言败', optB: '探索无尽', correct: 'B' }, { q: '路虎核心全地形技术？', optA: 'Terrain Response', optB: 'Quattro', correct: 'A' }, { q: '路虎诞生于？', optA: '英国', optB: '美国', correct: 'A' }, { q: '路虎卫士主打？', optA: '极致越野', optB: '城市通勤', correct: 'A' } ] },
-        { name: '优酸乳', slogan: '酸甜好滋味，青春不后悔。', bg: 'https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg',
-          questions: [ { q: '优酸乳主要口味？', optA: '草莓', optB: '蓝莓', correct: 'A' }, { q: '优酸乳属于？', optA: '伊利', optB: '蒙牛', correct: 'A' }, { q: '优酸乳品牌主张？', optA: '青春就要酸甜', optB: '健康每一天', correct: 'A' } ] },
-        { name: '可口可乐', slogan: 'Taste the Feeling，畅爽开怀。', bg: 'https://images.pexels.com/photos/2983101/pexels-photo-2983101.jpeg',
-          questions: [ { q: '可口可乐经典瓶身颜色？', optA: '红色', optB: '蓝色', correct: 'A' }, { q: '可口可乐诞生于？', optA: '1886年', optB: '1901年', correct: 'A' }, { q: '可口可乐英文是？', optA: 'Coca-Cola', optB: 'Pepsi', correct: 'A' } ] },
+        { name: 'LAND ROVER', slogan: '去征服，所有不服。', bg: 'https://images.pexels.com/photos/100653/pexels-photo-100653.jpeg', url: 'https://www.landrover.com.cn' },
+        { name: '优酸乳', slogan: '酸甜好滋味，青春不后悔。', bg: 'https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg', url: 'https://www.yili.com/product/ysh' },
+        { name: '可口可乐', slogan: 'Taste the Feeling，畅爽开怀。', bg: 'https://images.pexels.com/photos/2983101/pexels-photo-2983101.jpeg', url: 'https://www.coca-cola.com.cn' },
     ];
+    const QUESTIONS = {
+        0: [ { q: '路虎「Above & Beyond」意为？', optA: '永不言败', optB: '探索无尽', correct: 'B' }, { q: '路虎核心全地形技术？', optA: 'Terrain Response', optB: 'Quattro', correct: 'A' } ],
+        1: [ { q: '优酸乳主要口味？', optA: '草莓', optB: '蓝莓', correct: 'A' }, { q: '优酸乳属于？', optA: '伊利', optB: '蒙牛', correct: 'A' } ],
+        2: [ { q: '可口可乐经典瓶身颜色？', optA: '红色', optB: '蓝色', correct: 'A' }, { q: '可口可乐诞生于？', optA: '1886年', optB: '1901年', correct: 'A' } ],
+    };
+    // 恢复AI知识库
     const AI_KNOWLEDGE = {
         jokes: ['为什么企鹅不怕冷？因为它们有"企"业文化！🐧','程序员去沙漠越野，说："这里全是沙盒环境！"','可口可乐和百事可乐打架，你猜谁赢了？——裁判说：都"气"消了。','路虎车主最怕什么？——油价上涨，因为油箱比游泳池还大。'],
         general: {
@@ -217,9 +256,9 @@
         chitchat: ['今天天气不错，适合出去兜风！不过你得先看完广告~','你知道吗？企鹅是鸟类中游泳最快的！虽然我不会游泳...','我最近在追《逐玉》，超好看的！你也在追吗？','说实话，我觉得你答题的样子还挺帅的。','有人说广告很烦，但我觉得，有我在就不烦了对吧~']
     };
     const SHOP_ITEMS = [
-        { id: 'hat_landrover', name: '🚙 路虎帽子', cost: 50, desc: '戴上它，越野精神满满' },
-        { id: 'hat_yogurt', name: '🥛 优酸乳发卡', cost: 30, desc: '酸甜可爱的粉色发卡' },
-        { id: 'hat_coke', name: '🥤 可乐眼镜', cost: 40, desc: '红色潮流墨镜' },
+        { id: 'landrover', name: '🚙 路虎帽子', cost: 50, desc: '戴上它，越野精神满满' },
+        { id: 'yogurt', name: '🥛 优酸乳发卡', cost: 30, desc: '酸甜可爱的粉色发卡' },
+        { id: 'coke', name: '🥤 可乐眼镜', cost: 40, desc: '红色潮流墨镜' },
         { id: 'scarf_gold', name: '✨ 金色围巾', cost: 100, desc: '闪闪发光的升级围巾' },
         { id: 'boots_red', name: '👢 小红靴', cost: 60, desc: '穿上它跳得更欢' },
     ];
@@ -232,8 +271,8 @@
     let correctCount = 0, combo = 0;
     let watchTime = 0, timePoints = 0, playbackSpeed = 2, watchTimer = null;
     let level = 1, intimacy = 0, exp = 0;
-    let clickTimer = null, waitingFirstQuestion = false;
     let ownedItems = [];
+    let currentHat = null;
     let brandStats = { 0: { correct: 0, total: 0 }, 1: { correct: 0, total: 0 }, 2: { correct: 0, total: 0 } };
     const PREFERENCE_PROBABILITY = 0.7;
 
@@ -252,8 +291,7 @@
         document.getElementById('videoGrid').innerHTML = VIDEOS.map(v => {
             const prefBrand = getUserPreferredBrand();
             const isPref = prefBrand !== null && v.brand === prefBrand;
-            return `
-            <div class="video-card" onclick="openDetail(${v.id})">
+            return `<div class="video-card" onclick="openDetail(${v.id})">
                 <div class="video-thumb">${v.thumb}<span class="ad-badge">广告</span>${isPref ? '<span class="pref-tag">为你推荐</span>' : ''}</div>
                 <div class="video-info"><h3>${v.title}</h3><div class="meta"><span>⭐ ${v.rating}</span><span>${v.eps}集</span></div></div>
             </div>`;
@@ -265,8 +303,7 @@
         if (!v) return; currentVideo = v; currentEp = 1;
         document.getElementById('homePage').classList.add('hidden');
         const dp = document.getElementById('detailPage'); dp.classList.add('visible');
-        dp.innerHTML = `
-            <div class="detail-hero"><div class="detail-thumb">${v.thumb}</div><div class="detail-meta"><h2>${v.title}</h2><div class="info-row"><span>⭐ ${v.rating}</span><span>${v.eps}集</span></div><div class="desc">${v.desc}</div></div></div>
+        dp.innerHTML = `<div class="detail-hero"><div class="detail-thumb">${v.thumb}</div><div class="detail-meta"><h2>${v.title}</h2><div class="info-row"><span>⭐ ${v.rating}</span><span>${v.eps}集</span></div><div class="desc">${v.desc}</div></div></div>
             <div class="episode-section"><div class="section-title">剧集列表</div><div class="episode-grid">${Array.from({length:v.eps},(_,i)=>`<div class="episode-btn ${i===0?'current':''}" onclick="playEpisode(${i+1})">第${i+1}集</div>`).join('')}</div></div>`;
         document.getElementById('backBtn').classList.add('visible');
     };
@@ -285,6 +322,7 @@
         document.getElementById('homePage').classList.remove('hidden');
         document.getElementById('backBtn').classList.remove('visible');
         document.getElementById('userCenterOverlay').classList.remove('show');
+        document.getElementById('dressUpOverlay').classList.remove('show');
         stopAllTimers();
         document.getElementById('adLayer').classList.remove('active');
     };
@@ -298,20 +336,11 @@
 
     function resetAndStartAd() {
         stopAllTimers();
-        adActive = false;
-        penguinVisible = false;
-        questionActive = false;
-        cooldown = false;
-        waitingForNext = false;
-        waitingFirstQuestion = false;
-        correctCount = 0;
-        combo = 0;
+        adActive = false; penguinVisible = false; questionActive = false; cooldown = false; waitingForNext = false; waitingFirstQuestion = false;
+        correctCount = 0; combo = 0;
         document.getElementById('penguinBubbleArea').innerHTML = '';
         const pw = document.getElementById('penguinBodyWrapper');
-        // 直接隐藏企鹅，移除动画
-        pw.style.transition = 'none';
-        pw.style.transform = 'translateY(150px)';
-        pw.style.opacity = '0';
+        pw.classList.remove('visible'); pw.style.transition = 'none'; pw.style.transform = 'translateY(150px)'; pw.style.opacity = '0';
         document.getElementById('adLayer').classList.remove('active');
         document.getElementById('aiChatPanel').classList.remove('open');
         document.getElementById('watchProgressContainer').style.display = 'none';
@@ -319,7 +348,7 @@
         watchTime = 0;
         setTimeout(() => {
             document.getElementById('adLayer').classList.add('active');
-            pw.style.transition = 'none'; // 无动画，直接出现
+            pw.style.transition = 'none';
             startAd();
         }, 30);
     }
@@ -327,16 +356,13 @@
     function startAd() {
         let brandIndex = currentVideo.brand;
         const prefBrand = getUserPreferredBrand();
-        if (prefBrand !== null && Math.random() < PREFERENCE_PROBABILITY) {
-            brandIndex = prefBrand;
-        }
+        if (prefBrand !== null && Math.random() < PREFERENCE_PROBABILITY) brandIndex = prefBrand;
         const b = BRANDS[brandIndex];
         document.getElementById('adBrandName').textContent = b.name;
         document.getElementById('adBrandSlogan').textContent = b.slogan;
         document.getElementById('adLayer').style.backgroundImage = `url('${b.bg}')`;
         document.getElementById('adTimerDisplay').textContent = '02:00';
-        adTimeLeft = 120;
-        adActive = true;
+        adTimeLeft = 120; adActive = true;
         adTimer = setInterval(() => {
             if (!adActive) return;
             adTimeLeft--;
@@ -344,30 +370,30 @@
             if (!penguinVisible && adTimeLeft <= 115) showPenguin();
             if (adTimeLeft <= 0) { stopAd(); startWatch(); }
         }, 1000);
+        document.getElementById('adLayer').addEventListener('click', function(e) {
+            const safeZone = document.getElementById('penguinSafeArea');
+            if (safeZone && safeZone.contains(e.target)) return;
+            if (e.target.closest('.ad-click-area') || e.target.closest('.ai-chat-panel') || e.target.closest('.speed-badge') || e.target.closest('.user-center-overlay') || e.target.closest('.penguin-bubble') || e.target.closest('.quiz-opts') || e.target.closest('.next-question-btn') || e.target.closest('.penguin-name-tag') || e.target.closest('.penguin-stats-bar')) return;
+            const brand = BRANDS[brandIndex];
+            brandStats[brandIndex].clicked = (brandStats[brandIndex].clicked || 0) + 1;
+            window.open(brand.url, '_blank');
+        });
     }
 
     function stopAd() { adActive = false; clearInterval(adTimer); document.getElementById('adLayer').classList.remove('active'); document.getElementById('aiChatPanel').classList.remove('open'); }
 
     function showPenguin() {
         const pw = document.getElementById('penguinBodyWrapper');
-        // 直接显示，不带动画
-        pw.style.transition = 'none';
-        pw.style.transform = 'translateY(0)';
-        pw.style.opacity = '1';
-        penguinVisible = true;
-        waitingFirstQuestion = true;
+        pw.style.transition = 'none'; pw.style.transform = 'translateY(0)'; pw.style.opacity = '1';
+        penguinVisible = true; waitingFirstQuestion = true;
         showBubble('👋 嗨！答对3题跳过广告～双击我查看养成系统！');
-        setTimeout(() => {
-            waitingFirstQuestion = false;
-            if (adActive) askQuestion();
-        }, 1500);
+        setTimeout(() => { waitingFirstQuestion = false; if (adActive) askQuestion(); }, 1500);
     }
 
     function askQuestion() {
         if (!adActive || !penguinVisible || questionActive || cooldown || waitingForNext) return;
         if (correctCount >= REQUIRED_CORRECT) return;
-        const b = BRANDS[currentVideo.brand];
-        const q = b.questions[Math.floor(Math.random() * b.questions.length)];
+        const q = QUESTIONS[currentVideo.brand][Math.floor(Math.random() * QUESTIONS[currentVideo.brand].length)];
         showBubble(`🐧 第${correctCount+1}/3题：${q.q}`, true, q);
     }
 
@@ -437,7 +463,13 @@
         document.getElementById('panelIntimacy').textContent = intimacy;
         document.getElementById('panelWatchTime').textContent = formatWatchTime(watchTime);
         document.getElementById('panelTimePoints').textContent = timePoints + ' 分';
+        const pref = getUserPreferredBrand();
+        document.getElementById('panelPrefBrand').textContent = pref !== null ? BRANDS[pref].name : '--';
         renderShop();
+        renderDressUp();
+        const dressUpHat = document.getElementById('dressUpHat');
+        dressUpHat.className = 'hat ' + (currentHat || '');
+        if (!currentHat) dressUpHat.style.display = 'none'; else dressUpHat.style.display = 'block';
     }
 
     function formatWatchTime(sec) { if (sec < 60) return sec + ' 秒'; const m = Math.floor(sec/60), s = sec%60; return m + ' 分 ' + s + ' 秒'; }
@@ -450,7 +482,29 @@
                 <button class="buy-btn ${owned?'owned':''}" ${canBuy?'':'disabled'} onclick="buyItem('${item.id}', ${item.cost})">${owned?'已拥有':'兑换'}</button></div>`;
         }).join('');
     }
-    window.buyItem = function(id, cost) { if (timePoints >= cost && !ownedItems.includes(id)) { timePoints -= cost; ownedItems.push(id); updateStats(); showBubble('🛍️ 兑换成功！双击企鹅查看~'); } };
+    function renderDressUp() {
+        const list = document.getElementById('dressUpList');
+        list.innerHTML = SHOP_ITEMS.filter(item => ownedItems.includes(item.id)).map(item => {
+            const isActive = currentHat === item.id;
+            return `<div class="shop-item"><div><div class="item-name">${item.name}</div></div>
+                <button class="buy-btn" onclick="wearHat('${item.id}')">${isActive ? '穿戴中' : '穿戴'}</button></div>`;
+        }).join('');
+        if (list.innerHTML === '') list.innerHTML = '<p style="color:#888;">暂无装备，去用户中心兑换吧</p>';
+    }
+    window.wearHat = function(id) {
+        currentHat = id;
+        const hatEl = document.getElementById('penguinHat');
+        hatEl.className = 'hat ' + id;
+        updateStats();
+    };
+    window.buyItem = function(id, cost) {
+        if (timePoints >= cost && !ownedItems.includes(id)) {
+            timePoints -= cost; ownedItems.push(id); updateStats(); showBubble('🛍️ 兑换成功！双击企鹅查看~');
+        }
+    };
+
+    window.feedPenguin = function() { intimacy += 5; exp += 10; updateStats(); alert('🍞 喂食成功！亲密度 +5，经验 +10'); };
+    window.bathePenguin = function() { intimacy += 8; exp += 15; updateStats(); alert('🛁 洗澡成功！亲密度 +8，经验 +15'); };
 
     function startWatch() {
         document.getElementById('watchProgressContainer').style.display = 'block';
@@ -467,7 +521,7 @@
     }
     window.setSpeed = function(sp) { playbackSpeed = sp; document.querySelectorAll('.speed-btn').forEach(b => b.classList.toggle('active', b.dataset.speed == sp)); };
 
-    // AI 对话
+    // AI对话完整逻辑
     window.toggleAiChat = function() {
         const panel = document.getElementById('aiChatPanel');
         panel.classList.toggle('open');
@@ -475,9 +529,18 @@
             addAiMsg('ai', '你好！我是品牌顾问，不是推销员。你可以问我产品问题、让我讲笑话，或者随便聊聊~ 😊');
         }
     };
-    window.sendAiMessage = function() { const input = document.getElementById('aiChatInput'); const text = input.value.trim(); if (!text) return; addAiMsg('user', text); input.value = ''; generateAiReply(text); };
-    window.sendQuickMsg = function(text) { addAiMsg('user', text); generateAiReply(text); };
-
+    window.sendAiMessage = function() {
+        const input = document.getElementById('aiChatInput');
+        const text = input.value.trim();
+        if (!text) return;
+        addAiMsg('user', text);
+        input.value = '';
+        generateAiReply(text);
+    };
+    window.sendQuickMsg = function(text) {
+        addAiMsg('user', text);
+        generateAiReply(text);
+    };
     function generateAiReply(text) {
         const b = BRANDS[currentVideo.brand];
         let reply = '';
@@ -499,7 +562,6 @@
         }
         setTimeout(() => addAiMsg('ai', reply), 500);
     }
-
     function addAiMsg(role, text) {
         const msgs = document.getElementById('aiChatMessages');
         const div = document.createElement('div'); div.className = `chat-msg ${role}`; div.textContent = text; msgs.appendChild(div);
@@ -508,23 +570,22 @@
 
     // 企鹅交互
     const penguinBody = document.getElementById('penguinBodyWrapper');
+    let clickTimer = null, waitingFirstQuestion = false;
     penguinBody.addEventListener('click', (e) => {
         if (waitingFirstQuestion) { showBubble('🐧 马上出题哦～'); return; }
         if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; return; }
         clickTimer = setTimeout(() => {
             clickTimer = null;
             if (!adActive || !penguinVisible || questionActive || cooldown || waitingForNext) return;
-            const lines = ['🚙 好酷','🥛 好喝','🥤 加冰','💪 加油','🌟 双击查看养成'];
-            showBubble(`💬 ${lines[Math.floor(Math.random()*lines.length)]}`); intimacy++; updateStats();
+            showBubble(`💬 你好呀！`); intimacy++; updateStats();
         }, 250);
     });
     penguinBody.addEventListener('dblclick', () => {
         if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; }
         updateStats();
-        document.getElementById('userCenterOverlay').classList.add('show');
+        document.getElementById('dressUpOverlay').classList.add('show');
     });
 
-    // 用户中心（头像点击）
     window.openUserCenter = function() {
         updateStats();
         document.getElementById('userCenterOverlay').classList.add('show');
