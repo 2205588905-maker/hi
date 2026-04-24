@@ -2,148 +2,330 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>光影剧场 · 广告优化平台</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #0a0a0a; color: #e0e0e0; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .platform { width: 100%; max-width: 1400px; height: 100vh; background: #111; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 0 1px #333; }
-        .nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #0d0d0d; border-bottom: 1px solid #2a2a2a; flex-shrink: 0; }
-        .nav-left { display: flex; align-items: center; gap: 30px; }
-        .nav-logo { font-size: 24px; font-weight: 700; letter-spacing: 4px; color: #fff; }
-        .nav-links { display: flex; gap: 30px; }
-        .nav-link { color: #999; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        body {
+            background: #101010; color: #e0e0e0; font-family: 'Inter', sans-serif;
+            min-height: 100vh; display: flex; justify-content: center; align-items: center;
+            padding: 0;
+        }
+        .platform {
+            width: 100%; max-width: 1400px; height: 100vh; background: #141414;
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 0 0 1px #2a2a2a;
+        }
+        /* 腾讯视频风格导航 */
+        .nav-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; height: 64px; background: rgba(20,20,20,0.95);
+            backdrop-filter: blur(10px); border-bottom: 1px solid #2a2a2a;
+            flex-shrink: 0; z-index: 50;
+        }
+        .nav-left { display: flex; align-items: center; gap: 32px; }
+        .nav-logo { font-size: 24px; font-weight: 700; letter-spacing: 2px; color: #fff; cursor: pointer; }
+        .nav-links { display: flex; gap: 24px; }
+        .nav-link { color: #999; cursor: pointer; font-size: 15px; transition: 0.2s; white-space: nowrap; }
         .nav-link:hover, .nav-link.active { color: #fff; }
         .nav-right { display: flex; align-items: center; gap: 20px; }
-        .back-btn { background: #1a1a1a; border: 1px solid #444; color: #ccc; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s; display: none; }
+        .back-btn {
+            background: transparent; border: 1px solid #444; color: #ccc; padding: 6px 16px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; transition: 0.2s; display: none;
+            white-space: nowrap;
+        }
         .back-btn:hover { background: #2a2a2a; color: #fff; }
         .back-btn.visible { display: block; }
-        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #2a2a2a; border: 1px solid #555; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 18px; }
+        .user-avatar {
+            width: 36px; height: 36px; border-radius: 50%; background: #2a2a2a;
+            border: 1px solid #555; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s; font-size: 18px;
+        }
         .user-avatar:hover { background: #3a3a3a; border-color: #fff; }
+
         .main-content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
-        .home-page { padding: 30px 40px; display: block; }
+
+        /* 首页 */
+        .home-page { padding: 20px 24px; display: block; }
         .home-page.hidden { display: none; }
-        .section-title { font-size: 22px; font-weight: 600; margin-bottom: 20px; color: #fff; }
-        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; }
-        .video-card { background: #1a1a1a; border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid #2a2a2a; transition: 0.2s; position: relative; }
+        .section-title { font-size: 20px; font-weight: 600; margin: 16px 0 12px; color: #fff; }
+        .video-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px; margin-bottom: 32px;
+        }
+        .video-card {
+            background: #1a1a1a; border-radius: 8px; overflow: hidden; cursor: pointer;
+            border: 1px solid #2a2a2a; transition: 0.2s; position: relative;
+        }
         .video-card:hover { border-color: #555; transform: translateY(-2px); }
-        .video-thumb { width: 100%; aspect-ratio: 16/10; background: #222; display: flex; align-items: center; justify-content: center; font-size: 48px; position: relative; }
-        .video-info { padding: 14px 16px; }
-        .video-info h3 { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 6px; }
-        .video-info .meta { font-size: 13px; color: #888; display: flex; gap: 12px; }
-        .ad-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #ffcc00; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 1px solid rgba(255,204,0,0.4); }
-        .pref-tag { position: absolute; top: 8px; left: 8px; background: #fff; color: #000; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
-        .detail-page { padding: 30px 40px; display: none; }
+        .video-thumb {
+            width: 100%; aspect-ratio: 2/3; background: #222;
+            display: flex; align-items: center; justify-content: center; font-size: 40px;
+            position: relative;
+        }
+        .video-info { padding: 10px 12px; }
+        .video-info h3 {
+            font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 4px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .video-info .meta {
+            font-size: 12px; color: #888; display: flex; gap: 10px;
+            white-space: nowrap;
+        }
+        .ad-badge {
+            position: absolute; bottom: 6px; right: 6px;
+            background: rgba(0,0,0,0.8); color: #FFD700; padding: 2px 8px;
+            border-radius: 12px; font-size: 10px; font-weight: 500;
+            border: 1px solid rgba(255,215,0,0.4);
+        }
+        .pref-tag {
+            position: absolute; top: 6px; left: 6px; background: #FFD700; color: #000;
+            padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600;
+        }
+
+        /* 详情页与播单 */
+        .detail-page { padding: 20px 24px; display: none; }
         .detail-page.visible { display: block; }
-        .detail-hero { display: flex; gap: 30px; margin-bottom: 30px; }
-        .detail-thumb { width: 280px; aspect-ratio: 16/10; background: #222; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 72px; flex-shrink: 0; border: 1px solid #333; }
-        .detail-meta h2 { font-size: 28px; font-weight: 700; margin-bottom: 12px; color: #fff; }
-        .detail-meta .info-row { display: flex; gap: 20px; color: #999; font-size: 14px; margin-bottom: 15px; }
-        .detail-meta .desc { color: #aaa; font-size: 14px; line-height: 1.6; max-width: 500px; }
-        .episode-section { margin-top: 30px; }
-        .episode-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
-        .episode-btn { background: #1a1a1a; border: 1px solid #333; color: #ccc; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .detail-hero { display: flex; gap: 20px; margin-bottom: 24px; }
+        .detail-thumb {
+            width: 180px; aspect-ratio: 2/3; background: #222; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; font-size: 48px;
+            flex-shrink: 0; border: 1px solid #333;
+        }
+        .detail-meta h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+        .detail-meta .info-row { display: flex; gap: 16px; color: #999; font-size: 13px; margin-bottom: 12px; flex-wrap: wrap; }
+        .detail-meta .desc { color: #aaa; font-size: 13px; line-height: 1.5; max-width: 500px; }
+        .episode-section { margin-top: 24px; }
+        .episode-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .episode-btn {
+            background: #1a1a1a; border: 1px solid #333; color: #ccc; padding: 8px 16px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; transition: 0.2s; white-space: nowrap;
+        }
         .episode-btn:hover { background: #2a2a2a; border-color: #fff; color: #fff; }
-        .episode-btn.current { background: #fff; color: #000; border-color: #fff; font-weight: 600; }
+        .episode-btn.current { background: #FFD700; color: #000; border-color: #FFD700; font-weight: 600; }
+
+        /* 播放页 */
         .player-page { display: none; flex-direction: column; height: 100%; }
         .player-page.visible { display: flex; }
-        .player-area { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; position: relative; min-height: 400px; }
+        .player-area {
+            flex: 1; background: #000; display: flex; align-items: center; justify-content: center;
+            position: relative; min-height: 0;
+        }
         .ad-layer { position: absolute; inset: 0; background-size: cover; background-position: center; display: none; flex-direction: column; z-index: 10; }
         .ad-layer.active { display: flex; }
-        .ad-layer::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.5) 100%); pointer-events: none; }
-        .ad-brand-info { position: relative; z-index: 2; padding: 30px 40px; pointer-events: none; }
-        .ad-brand-info .brand-name { font-size: 22px; font-weight: 600; letter-spacing: 6px; color: rgba(255,255,255,0.8); text-transform: uppercase; }
-        .ad-brand-info .brand-slogan { font-size: 48px; font-weight: 800; color: #fff; max-width: 600px; margin-top: 10px; }
-        .ad-timer-display { position: absolute; top: 30px; right: 40px; z-index: 5; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 10px 24px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.3); color: #fff; font-size: 20px; font-weight: 600; letter-spacing: 1px; pointer-events: none; }
-        .penguin-safe-area { position: absolute; bottom: 20px; right: 30px; z-index: 30; display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; }
-        .penguin-bubble-area { display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 8px; pointer-events: none; min-height: 50px; }
-        .penguin-bubble { background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); padding: 12px 18px; border-radius: 20px 20px 4px 20px; max-width: 260px; box-shadow: 0 6px 0 #ccc, 0 8px 20px rgba(0,0,0,0.3); border: 1px solid #ddd; margin-bottom: 6px; font-weight: 500; color: #111; font-size: 15px; animation: bubblePop 0.3s ease-out; pointer-events: auto; }
+        .ad-layer::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.5) 100%);
+            pointer-events: none;
+        }
+        .ad-brand-info { position: relative; z-index: 2; padding: 24px 32px; pointer-events: none; }
+        .ad-brand-info .brand-name { font-size: 18px; font-weight: 600; letter-spacing: 4px; color: rgba(255,255,255,0.8); text-transform: uppercase; }
+        .ad-brand-info .brand-slogan { font-size: clamp(28px, 5vw, 48px); font-weight: 800; color: #fff; max-width: 600px; margin-top: 8px; }
+        .ad-timer-display {
+            position: absolute; top: 24px; right: 32px; z-index: 5;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 8px 20px;
+            border-radius: 20px; border: 1px solid rgba(255,215,0,0.3); color: #FFD700;
+            font-size: 18px; font-weight: 600; letter-spacing: 1px; pointer-events: none;
+        }
+        .brand-link-hint {
+            position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.6); color: #ccc; padding: 4px 14px;
+            border-radius: 16px; font-size: 11px; z-index: 15; pointer-events: none;
+        }
+        .ad-click-area {
+            position: absolute; bottom: 80px; left: 32px; z-index: 15;
+            background: rgba(255,255,255,0.15); backdrop-filter: blur(4px); padding: 8px 18px;
+            border-radius: 20px; border: 1px solid rgba(255,255,255,0.3); cursor: pointer;
+            color: #fff; font-size: 13px; font-weight: 500; transition: 0.2s;
+            white-space: nowrap;
+        }
+        .ad-click-area:hover { background: rgba(255,255,255,0.25); }
+
+        /* 企鹅及答题安全区 */
+        .penguin-safe-area {
+            position: absolute; bottom: 16px; right: 24px; z-index: 30;
+            display: flex; flex-direction: column; align-items: flex-end; pointer-events: none;
+        }
+        .penguin-bubble-area { display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 8px; pointer-events: none; min-height: 40px; }
+        .penguin-bubble {
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); padding: 10px 16px;
+            border-radius: 18px 18px 4px 18px; max-width: 240px;
+            box-shadow: 0 4px 0 #ccc, 0 6px 15px rgba(0,0,0,0.3);
+            border: 1px solid #ddd; margin-bottom: 4px; font-weight: 500; color: #111;
+            font-size: 14px; animation: bubblePop 0.3s ease-out; pointer-events: auto;
+        }
         @keyframes bubblePop { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        .quiz-opts { display: flex; gap: 8px; margin-top: 4px; pointer-events: auto; }
-        .quiz-opt { background: #f0f0f0; border: 2px solid #ccc; border-radius: 30px; padding: 8px 16px; font-size: 14px; font-weight: 600; color: #111; cursor: pointer; box-shadow: 0 3px 0 #bbb; transition: 0.05s; }
+        .quiz-opts { display: flex; gap: 6px; margin-top: 4px; pointer-events: auto; }
+        .quiz-opt {
+            background: #f0f0f0; border: 2px solid #ccc; border-radius: 24px; padding: 8px 14px;
+            font-size: 13px; font-weight: 600; color: #111; cursor: pointer;
+            box-shadow: 0 3px 0 #bbb; transition: 0.05s; white-space: nowrap;
+        }
         .quiz-opt:active { transform: translateY(2px); box-shadow: 0 1px 0 #bbb; }
-        .next-question-btn { background: #111; color: #fff; border: none; border-radius: 30px; padding: 10px 24px; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 6px; pointer-events: auto; }
-        .penguin-body-wrapper { width: 120px; height: 140px; pointer-events: auto; cursor: pointer; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); }
-        .qq-body { width: 100%; height: 100%; background: #1a1c22; border-radius: 55% 55% 48% 48%; position: relative; border: 2px solid #333; box-shadow: inset 0 -6px 0 #0f1114, 0 8px 0 #0a0f14; }
-        .qq-belly { position: absolute; bottom: 15px; left: 22px; width: 76px; height: 70px; background: #f5f5f5; border-radius: 50% 50% 42% 42%; }
-        .qq-eyes { position: absolute; top: 32px; left: 14px; right: 14px; display: flex; justify-content: space-around; }
-        .qq-eye { width: 28px; height: 34px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
-        .qq-pupil { width: 14px; height: 18px; background: #111; border-radius: 50%; position: relative; }
-        .qq-pupil::after { content: ''; position: absolute; top: 2px; left: 3px; width: 5px; height: 5px; background: white; border-radius: 50%; opacity: 0.7; }
-        .qq-scarf { position: absolute; bottom: 20px; left: 0; right: 0; height: 22px; background: #c92a2a; border-radius: 15px 15px 8px 8px; z-index: 3; box-shadow: 0 3px 0 #8f1e1e; }
-        .qq-beak { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); width: 18px; height: 12px; background: #e09d32; border-radius: 0 0 50% 50%; z-index: 4; }
-        .qq-feet { position: absolute; bottom: -10px; left: 14px; right: 14px; display: flex; justify-content: space-between; }
-        .qq-foot { width: 28px; height: 16px; background: #e09d32; border-radius: 50% 50% 30% 30%; box-shadow: 0 4px 0 #a06f1e; }
-        .penguin-name-tag { text-align: center; color: #fff; font-weight: 600; margin-top: 6px; font-size: 13px; }
-        .penguin-stats-bar { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 20px; margin-top: 4px; opacity: 0; transition: 0.2s; font-size: 11px; color: #ccc; border: 1px solid rgba(255,255,255,0.2); }
+        .next-question-btn {
+            background: #111; color: #fff; border: none; border-radius: 24px; padding: 8px 20px;
+            font-weight: 600; font-size: 13px; cursor: pointer; margin-top: 4px; pointer-events: auto;
+        }
+        .penguin-body-wrapper {
+            width: 100px; height: 118px; pointer-events: auto; cursor: pointer;
+            filter: drop-shadow(0 8px 8px rgba(0,0,0,0.5));
+        }
+        .qq-body {
+            width: 100%; height: 100%; background: #1a1c22; border-radius: 55% 55% 48% 48%;
+            position: relative; border: 2px solid #333;
+            box-shadow: inset 0 -5px 0 #0f1114, 0 6px 0 #0a0f14;
+        }
+        .qq-belly {
+            position: absolute; bottom: 12px; left: 20px; width: 60px; height: 58px;
+            background: #f5f5f5; border-radius: 50% 50% 42% 42%;
+        }
+        .qq-eyes { position: absolute; top: 26px; left: 12px; right: 12px; display: flex; justify-content: space-around; }
+        .qq-eye { width: 24px; height: 28px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+        .qq-pupil { width: 12px; height: 15px; background: #111; border-radius: 50%; position: relative; }
+        .qq-pupil::after { content: ''; position: absolute; top: 2px; left: 2px; width: 4px; height: 4px; background: white; border-radius: 50%; opacity: 0.7; }
+        .qq-scarf {
+            position: absolute; bottom: 16px; left: 0; right: 0; height: 18px;
+            background: #c92a2a; border-radius: 12px 12px 6px 6px; z-index: 3;
+            box-shadow: 0 2px 0 #8f1e1e;
+        }
+        .qq-beak {
+            position: absolute; bottom: 42px; left: 50%; transform: translateX(-50%);
+            width: 16px; height: 10px; background: #e09d32; border-radius: 0 0 50% 50%; z-index: 4;
+        }
+        .qq-feet { position: absolute; bottom: -8px; left: 12px; right: 12px; display: flex; justify-content: space-between; }
+        .qq-foot { width: 24px; height: 14px; background: #e09d32; border-radius: 50% 50% 30% 30%; box-shadow: 0 4px 0 #a06f1e; }
+        .penguin-name-tag { text-align: center; color: #fff; font-weight: 600; margin-top: 4px; font-size: 11px; }
+        .penguin-stats-bar {
+            display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.6);
+            padding: 3px 10px; border-radius: 16px; margin-top: 2px; opacity: 0; transition: 0.2s;
+            font-size: 10px; color: #ccc; border: 1px solid rgba(255,255,255,0.2);
+        }
         .penguin-body-wrapper:hover .penguin-stats-bar { opacity: 1; }
-        .penguin-stats-bar .level-badge { background: #fff; color: #000; padding: 2px 8px; border-radius: 10px; font-weight: 700; font-size: 10px; }
-        .penguin-stats-bar .progress-mini { width: 50px; height: 3px; background: #333; border-radius: 5px; overflow: hidden; }
-        .penguin-stats-bar .progress-mini-fill { height: 100%; background: #fff; border-radius: 5px; transition: 0.3s; }
-        .hat { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); width: 60px; height: 30px; display: none; z-index: 10; }
-        .hat.landrover { display: block; background: #2c3e4e; border-radius: 40% 40% 20% 20%; box-shadow: 0 4px 0 #1a2630; }
-        .hat.landrover::after { content: '🚙'; position: absolute; font-size: 16px; top: -10px; left: 50%; transform: translateX(-50%); }
-        .hat.yogurt { display: block; background: #f0a6c0; border-radius: 30% 30% 15% 15%; box-shadow: 0 4px 0 #c07890; }
-        .hat.yogurt::after { content: '🥛'; position: absolute; font-size: 14px; top: -8px; left: 50%; transform: translateX(-50%); }
-        .hat.coke { display: block; background: #e63946; border-radius: 20% 20% 10% 10%; box-shadow: 0 4px 0 #b0232e; }
-        .hat.coke::after { content: '🥤'; position: absolute; font-size: 14px; top: -8px; left: 50%; transform: translateX(-50%); }
-        .ai-chat-panel { position: absolute; bottom: 100px; left: 40px; z-index: 25; display: none; flex-direction: column; background: rgba(20,20,20,0.95); backdrop-filter: blur(10px); border-radius: 16px; padding: 20px; width: 360px; max-height: 350px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .penguin-stats-bar .level-badge { background: #FFD700; color: #000; padding: 1px 6px; border-radius: 8px; font-weight: 700; font-size: 9px; }
+        .penguin-stats-bar .progress-mini { width: 40px; height: 3px; background: #333; border-radius: 4px; overflow: hidden; }
+        .penguin-stats-bar .progress-mini-fill { height: 100%; background: #FFD700; border-radius: 4px; transition: 0.3s; }
+
+        .hat { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); width: 50px; height: 25px; display: none; z-index: 10; }
+        .hat.landrover { display: block; background: #2c3e4e; border-radius: 40% 40% 20% 20%; box-shadow: 0 3px 0 #1a2630; }
+        .hat.landrover::after { content: '🚙'; position: absolute; font-size: 14px; top: -8px; left: 50%; transform: translateX(-50%); }
+        .hat.yogurt { display: block; background: #f0a6c0; border-radius: 30% 30% 15% 15%; box-shadow: 0 3px 0 #c07890; }
+        .hat.yogurt::after { content: '🥛'; position: absolute; font-size: 12px; top: -6px; left: 50%; transform: translateX(-50%); }
+        .hat.coke { display: block; background: #e63946; border-radius: 20% 20% 10% 10%; box-shadow: 0 3px 0 #b0232e; }
+        .hat.coke::after { content: '🥤'; position: absolute; font-size: 12px; top: -6px; left: 50%; transform: translateX(-50%); }
+
+        .ai-chat-panel {
+            position: absolute; bottom: 90px; left: 32px; z-index: 25;
+            display: none; flex-direction: column; background: rgba(20,20,20,0.95);
+            backdrop-filter: blur(10px); border-radius: 14px; padding: 16px;
+            width: 320px; max-height: 300px; border: 1px solid #444;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
         .ai-chat-panel.open { display: flex; }
-        .ai-chat-panel .chat-title { font-size: 13px; color: #999; margin-bottom: 10px; letter-spacing: 1px; text-transform: uppercase; }
-        .ai-chat-panel .chat-messages { flex: 1; overflow-y: auto; max-height: 220px; margin-bottom: 10px; font-size: 13px; }
-        .ai-chat-panel .chat-msg { padding: 8px 12px; border-radius: 12px; margin-bottom: 8px; line-height: 1.5; }
+        .ai-chat-panel .chat-title { font-size: 12px; color: #999; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
+        .ai-chat-panel .chat-messages { flex: 1; overflow-y: auto; max-height: 180px; margin-bottom: 8px; font-size: 12px; }
+        .ai-chat-panel .chat-msg { padding: 6px 10px; border-radius: 10px; margin-bottom: 6px; line-height: 1.4; }
         .ai-chat-panel .chat-msg.user { background: #333; color: #fff; text-align: right; }
         .ai-chat-panel .chat-msg.ai { background: #f0f0f0; color: #111; }
-        .ai-chat-panel .quick-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-        .ai-chat-panel .quick-action { background: #1a1a1a; border: 1px solid #444; color: #ccc; padding: 6px 14px; border-radius: 16px; cursor: pointer; font-size: 12px; transition: 0.1s; }
+        .ai-chat-panel .quick-actions { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+        .ai-chat-panel .quick-action {
+            background: #1a1a1a; border: 1px solid #444; color: #ccc; padding: 4px 10px;
+            border-radius: 14px; cursor: pointer; font-size: 11px; transition: 0.1s;
+        }
         .ai-chat-panel .quick-action:hover { background: #2a2a2a; color: #fff; }
-        .ai-chat-panel .chat-input-area { display: flex; gap: 6px; }
-        .ai-chat-panel input { flex: 1; background: #1a1a1a; border: 1px solid #555; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none; }
-        .ai-chat-panel button { background: #fff; color: #000; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; }
-        .ad-click-area { position: absolute; bottom: 80px; left: 40px; z-index: 15; background: rgba(255,255,255,0.1); backdrop-filter: blur(4px); padding: 8px 20px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.3); cursor: pointer; color: #fff; font-size: 13px; font-weight: 500; transition: 0.2s; }
-        .ad-click-area:hover { background: rgba(255,255,255,0.2); }
-        .speed-badge { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 15; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.3); display: flex; gap: 8px; }
-        .speed-btn { color: #aaa; cursor: pointer; font-size: 13px; font-weight: 500; padding: 2px 8px; border-radius: 10px; transition: 0.1s; }
-        .speed-btn.active { color: #fff; background: rgba(255,255,255,0.2); font-weight: 600; }
+        .ai-chat-panel .chat-input-area { display: flex; gap: 4px; }
+        .ai-chat-panel input {
+            flex: 1; background: #1a1a1a; border: 1px solid #555; color: #fff;
+            padding: 6px 10px; border-radius: 8px; font-size: 12px; outline: none;
+        }
+        .ai-chat-panel button {
+            background: #FFD700; color: #000; border: none; padding: 6px 14px;
+            border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 11px;
+        }
+
+        .speed-badge {
+            position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 15;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); padding: 4px 12px;
+            border-radius: 16px; border: 1px solid rgba(255,255,255,0.3); display: flex; gap: 6px;
+        }
+        .speed-btn { color: #aaa; cursor: pointer; font-size: 12px; font-weight: 500; padding: 2px 6px; border-radius: 8px; transition: 0.1s; }
+        .speed-btn.active { color: #fff; background: rgba(255,215,0,0.2); font-weight: 600; }
         .speed-btn:hover { color: #fff; }
-        .watch-progress-container { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: #333; z-index: 20; }
-        .watch-progress-fill { height: 100%; background: #fff; transition: width 0.1s linear; }
+
+        .watch-progress-container { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: #333; z-index: 20; }
+        .watch-progress-fill { height: 100%; background: #FFD700; transition: width 0.1s linear; }
+
         .user-center-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 200; opacity: 0; pointer-events: none; transition: 0.3s; }
         .user-center-overlay.show { opacity: 1; pointer-events: auto; }
-        .user-center-panel { background: rgba(20, 20, 20, 0.98); backdrop-filter: blur(25px); border-radius: 24px; padding: 30px; max-width: 500px; width: 85vw; max-height: 80vh; overflow-y: auto; border: 1px solid #444; box-shadow: 0 20px 40px rgba(0,0,0,0.7); }
-        .user-center-panel h3 { color: #fff; font-size: 22px; margin-bottom: 10px; text-align: center; }
-        .user-center-panel .panel-subtitle { color: #888; font-size: 13px; text-align: center; margin-bottom: 20px; }
-        .user-center-panel .stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2a2a2a; color: #ccc; font-size: 15px; }
+        .user-center-panel {
+            background: rgba(30,30,30,0.98); backdrop-filter: blur(25px); border-radius: 16px;
+            padding: 24px; max-width: 400px; width: 90vw; max-height: 75vh; overflow-y: auto;
+            border: 1px solid #444; box-shadow: 0 16px 32px rgba(0,0,0,0.7);
+        }
+        .user-center-panel h3 { color: #fff; font-size: 20px; margin-bottom: 8px; text-align: center; }
+        .user-center-panel .panel-subtitle { color: #888; font-size: 12px; text-align: center; margin-bottom: 16px; }
+        .user-center-panel .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2a2a2a; color: #ccc; font-size: 14px; }
         .user-center-panel .stat-row span:last-child { font-weight: 600; color: #fff; }
-        .user-center-panel .progress-bg { height: 8px; background: #2a2a2a; border-radius: 10px; margin: 10px 0; overflow: hidden; }
-        .user-center-panel .progress-fill { height: 100%; background: #fff; border-radius: 10px; transition: 0.3s; }
-        .user-center-panel .section-title-sm { font-size: 16px; font-weight: 600; color: #fff; margin: 20px 0 12px; }
-        .user-center-panel .shop-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #1a1a1a; border-radius: 12px; margin-bottom: 8px; border: 1px solid #2a2a2a; }
-        .user-center-panel .shop-item .item-name { color: #fff; font-weight: 500; }
-        .user-center-panel .shop-item .item-cost { color: #888; font-size: 13px; }
-        .user-center-panel .shop-item .buy-btn { background: #fff; color: #000; border: none; padding: 6px 16px; border-radius: 16px; font-weight: 600; font-size: 12px; cursor: pointer; transition: 0.1s; }
+        .user-center-panel .progress-bg { height: 6px; background: #2a2a2a; border-radius: 6px; margin: 8px 0; overflow: hidden; }
+        .user-center-panel .progress-fill { height: 100%; background: #FFD700; border-radius: 6px; transition: 0.3s; }
+        .user-center-panel .section-title-sm { font-size: 15px; font-weight: 600; color: #fff; margin: 18px 0 10px; }
+        .user-center-panel .shop-item {
+            display: flex; justify-content: space-between; align-items: center; padding: 8px 12px;
+            background: #1a1a1a; border-radius: 10px; margin-bottom: 6px; border: 1px solid #2a2a2a;
+        }
+        .user-center-panel .shop-item .item-name { color: #fff; font-weight: 500; font-size: 14px; }
+        .user-center-panel .shop-item .item-cost { color: #888; font-size: 12px; }
+        .user-center-panel .shop-item .buy-btn {
+            background: #FFD700; color: #000; border: none; padding: 4px 14px;
+            border-radius: 14px; font-weight: 600; font-size: 12px; cursor: pointer; transition: 0.1s;
+        }
         .user-center-panel .shop-item .buy-btn.owned { background: #333; color: #888; cursor: default; }
         .user-center-panel .shop-item .buy-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .close-panel-btn { background: transparent; border: 1px solid #fff; color: #fff; padding: 10px 30px; border-radius: 20px; margin-top: 20px; font-weight: 600; cursor: pointer; width: 100%; }
+        .close-panel-btn {
+            background: transparent; border: 1px solid #fff; color: #fff; padding: 8px 24px;
+            border-radius: 16px; margin-top: 16px; font-weight: 600; cursor: pointer; width: 100%;
+        }
         .close-panel-btn:hover { background: #fff; color: #000; }
-        .brand-link-hint { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: #ccc; padding: 6px 16px; border-radius: 20px; font-size: 12px; z-index: 15; pointer-events: none; transition: 0.3s; }
-        .dress-up-penguin { width: 120px; height: 140px; margin: 20px auto; position: relative; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); }
+
+        .dress-up-penguin { width: 100px; height: 118px; margin: 16px auto; position: relative; filter: drop-shadow(0 8px 8px rgba(0,0,0,0.5)); }
         .dress-up-penguin .qq-body { position: relative; width: 100%; height: 100%; }
-        .dress-up-penguin .hat { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); width: 60px; height: 30px; display: none; z-index: 10; }
+        .dress-up-penguin .hat { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); width: 50px; height: 25px; display: none; z-index: 10; }
         .dress-up-penguin .hat.active { display: block; }
-        .care-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
-        .care-btn { background: #2a2a2a; border: 1px solid #555; color: #ccc; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: 0.1s; }
+        .care-buttons { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+        .care-btn {
+            background: #2a2a2a; border: 1px solid #555; color: #ccc; padding: 6px 16px;
+            border-radius: 16px; cursor: pointer; font-size: 12px; transition: 0.1s; white-space: nowrap;
+        }
         .care-btn:hover { background: #3a3a3a; color: #fff; }
+
+        @media (max-width: 768px) {
+            .nav-bar { padding: 0 16px; height: 56px; }
+            .nav-logo { font-size: 20px; }
+            .nav-links { gap: 16px; }
+            .nav-link { font-size: 13px; }
+            .video-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+            .video-thumb { font-size: 28px; }
+            .video-info h3 { font-size: 13px; }
+            .detail-hero { flex-direction: column; }
+            .detail-thumb { width: 120px; }
+            .ad-brand-info { padding: 16px; }
+            .ad-brand-info .brand-name { font-size: 14px; }
+            .ad-brand-info .brand-slogan { font-size: 24px; }
+            .ad-timer-display { top: 12px; right: 16px; font-size: 14px; padding: 4px 12px; }
+            .penguin-safe-area { right: 12px; bottom: 8px; }
+            .ai-chat-panel { width: 260px; left: 16px; bottom: 70px; }
+            .ad-click-area { left: 16px; bottom: 60px; }
+        }
     </style>
 </head>
 <body>
 <div class="platform">
     <div class="nav-bar">
         <div class="nav-left">
-            <div class="nav-logo">光影剧场</div>
+            <div class="nav-logo" onclick="goHome()">腾讯视频</div>
             <div class="nav-links">
                 <span class="nav-link active" onclick="goHome()">首页</span>
+                <span class="nav-link">VIP</span>
                 <span class="nav-link">片库</span>
             </div>
         </div>
@@ -174,8 +356,8 @@
                         <div class="chat-input-area"><input type="text" id="aiChatInput" placeholder="随便问，我不推销..." onkeypress="if(event.key==='Enter')sendAiMessage()"><button onclick="sendAiMessage()">发送</button></div>
                     </div>
                     <div class="penguin-safe-area" id="penguinSafeArea" style="pointer-events:none;">
-                        <div class="penguin-bubble-area" id="penguinBubbleArea" style="pointer-events:none; min-height:50px;"></div>
-                        <div class="penguin-body-wrapper" id="penguinBodyWrapper" style="pointer-events:auto; cursor:pointer; filter:drop-shadow(0 10px 10px rgba(0,0,0,0.5));">
+                        <div class="penguin-bubble-area" id="penguinBubbleArea" style="pointer-events:none; min-height:40px;"></div>
+                        <div class="penguin-body-wrapper" id="penguinBodyWrapper" style="pointer-events:auto; cursor:pointer;">
                             <div class="qq-body"><div class="qq-belly"></div><div class="qq-eyes"><div class="qq-eye"><div class="qq-pupil"></div></div><div class="qq-eye"><div class="qq-pupil"></div></div></div><div class="qq-scarf"></div><div class="qq-beak"></div></div>
                             <div class="qq-feet"><div class="qq-foot"></div><div class="qq-foot"></div></div>
                             <div class="hat" id="penguinHat"></div>
@@ -208,7 +390,7 @@
                         <div class="panel-subtitle">双击企鹅打开 · 单击关闭</div>
                         <div class="dress-up-penguin" id="dressUpPenguin">
                             <div class="qq-body"><div class="qq-belly"></div><div class="qq-eyes"><div class="qq-eye"><div class="qq-pupil"></div></div><div class="qq-eye"><div class="qq-pupil"></div></div></div><div class="qq-scarf"></div><div class="qq-beak"></div></div>
-                            <div class="qq-feet" style="position:absolute; bottom:-10px; left:14px; right:14px; display:flex; justify-content:space-between;"><div class="qq-foot"></div><div class="qq-foot"></div></div>
+                            <div class="qq-feet" style="position:absolute; bottom:-8px; left:12px; right:12px; display:flex; justify-content:space-between;"><div class="qq-foot"></div><div class="qq-foot"></div></div>
                             <div class="hat" id="dressUpHat"></div>
                         </div>
                         <div id="dressUpList"></div>
@@ -234,7 +416,6 @@
         { id: 5, title: '陷入我们的热恋', thumb: '💕', rating: '8.3', eps: 20, desc: '青春甜宠，耳东兔子原著。', brand: 1 },
         { id: 6, title: '滤镜', thumb: '📸', rating: '8.1', eps: 16, desc: '现代奇幻，檀健次李兰迪。', brand: 2 },
     ];
-    // 修正品牌官网链接为真实可访问地址
     const BRANDS = [
         { name: 'LAND ROVER', slogan: '去征服，所有不服。', bg: 'https://images.pexels.com/photos/100653/pexels-photo-100653.jpeg', url: 'https://www.landrover.com.cn' },
         { name: '优酸乳', slogan: '酸甜好滋味，青春不后悔。', bg: 'https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg', url: 'https://www.yili.com/product/ysh' },
@@ -245,7 +426,6 @@
         1: [ { q: '优酸乳主要口味？', optA: '草莓', optB: '蓝莓', correct: 'A' }, { q: '优酸乳属于？', optA: '伊利', optB: '蒙牛', correct: 'A' } ],
         2: [ { q: '可口可乐经典瓶身颜色？', optA: '红色', optB: '蓝色', correct: 'A' }, { q: '可口可乐诞生于？', optA: '1886年', optB: '1901年', correct: 'A' } ],
     };
-    // 恢复AI知识库
     const AI_KNOWLEDGE = {
         jokes: ['为什么企鹅不怕冷？因为它们有"企"业文化！🐧','程序员去沙漠越野，说："这里全是沙盒环境！"','可口可乐和百事可乐打架，你猜谁赢了？——裁判说：都"气"消了。','路虎车主最怕什么？——油价上涨，因为油箱比游泳池还大。'],
         general: {
@@ -328,11 +508,7 @@
     };
     window.goHome = () => goBack();
 
-    function stopAllTimers() {
-        if (adTimer) clearInterval(adTimer);
-        if (watchTimer) clearInterval(watchTimer);
-        adActive = false;
-    }
+    function stopAllTimers() { if (adTimer) clearInterval(adTimer); if (watchTimer) clearInterval(watchTimer); adActive = false; }
 
     function resetAndStartAd() {
         stopAllTimers();
@@ -346,11 +522,7 @@
         document.getElementById('watchProgressContainer').style.display = 'none';
         document.getElementById('watchProgressFill').style.width = '0%';
         watchTime = 0;
-        setTimeout(() => {
-            document.getElementById('adLayer').classList.add('active');
-            pw.style.transition = 'none';
-            startAd();
-        }, 30);
+        setTimeout(() => { document.getElementById('adLayer').classList.add('active'); pw.style.transition = 'none'; startAd(); }, 30);
     }
 
     function startAd() {
@@ -427,11 +599,7 @@
             showBubble(`🎉 答对！( ${correctCount}/${REQUIRED_CORRECT} )`);
             if (correctCount >= REQUIRED_CORRECT) { showBubble('🏆 通关！进入观影...'); setTimeout(() => { stopAd(); startWatch(); }, 1500); }
             else showNextButton();
-        } else {
-            combo = 0;
-            showBubble(`🤔 答案是 ${qData.correct} (${correctCount}/${REQUIRED_CORRECT})`);
-            startCooldown();
-        }
+        } else { combo = 0; showBubble(`🤔 答案是 ${qData.correct} (${correctCount}/${REQUIRED_CORRECT})`); startCooldown(); }
     }
 
     function showNextButton() {
@@ -465,8 +633,7 @@
         document.getElementById('panelTimePoints').textContent = timePoints + ' 分';
         const pref = getUserPreferredBrand();
         document.getElementById('panelPrefBrand').textContent = pref !== null ? BRANDS[pref].name : '--';
-        renderShop();
-        renderDressUp();
+        renderShop(); renderDressUp();
         const dressUpHat = document.getElementById('dressUpHat');
         dressUpHat.className = 'hat ' + (currentHat || '');
         if (!currentHat) dressUpHat.style.display = 'none'; else dressUpHat.style.display = 'block';
@@ -491,18 +658,8 @@
         }).join('');
         if (list.innerHTML === '') list.innerHTML = '<p style="color:#888;">暂无装备，去用户中心兑换吧</p>';
     }
-    window.wearHat = function(id) {
-        currentHat = id;
-        const hatEl = document.getElementById('penguinHat');
-        hatEl.className = 'hat ' + id;
-        updateStats();
-    };
-    window.buyItem = function(id, cost) {
-        if (timePoints >= cost && !ownedItems.includes(id)) {
-            timePoints -= cost; ownedItems.push(id); updateStats(); showBubble('🛍️ 兑换成功！双击企鹅查看~');
-        }
-    };
-
+    window.wearHat = function(id) { currentHat = id; document.getElementById('penguinHat').className = 'hat ' + id; updateStats(); };
+    window.buyItem = function(id, cost) { if (timePoints >= cost && !ownedItems.includes(id)) { timePoints -= cost; ownedItems.push(id); updateStats(); showBubble('🛍️ 兑换成功！双击企鹅查看~'); } };
     window.feedPenguin = function() { intimacy += 5; exp += 10; updateStats(); alert('🍞 喂食成功！亲密度 +5，经验 +10'); };
     window.bathePenguin = function() { intimacy += 8; exp += 15; updateStats(); alert('🛁 洗澡成功！亲密度 +8，经验 +15'); };
 
@@ -521,7 +678,6 @@
     }
     window.setSpeed = function(sp) { playbackSpeed = sp; document.querySelectorAll('.speed-btn').forEach(b => b.classList.toggle('active', b.dataset.speed == sp)); };
 
-    // AI对话完整逻辑
     window.toggleAiChat = function() {
         const panel = document.getElementById('aiChatPanel');
         panel.classList.toggle('open');
@@ -529,37 +685,18 @@
             addAiMsg('ai', '你好！我是品牌顾问，不是推销员。你可以问我产品问题、让我讲笑话，或者随便聊聊~ 😊');
         }
     };
-    window.sendAiMessage = function() {
-        const input = document.getElementById('aiChatInput');
-        const text = input.value.trim();
-        if (!text) return;
-        addAiMsg('user', text);
-        input.value = '';
-        generateAiReply(text);
-    };
-    window.sendQuickMsg = function(text) {
-        addAiMsg('user', text);
-        generateAiReply(text);
-    };
+    window.sendAiMessage = function() { const input = document.getElementById('aiChatInput'); const text = input.value.trim(); if (!text) return; addAiMsg('user', text); input.value = ''; generateAiReply(text); };
+    window.sendQuickMsg = function(text) { addAiMsg('user', text); generateAiReply(text); };
     function generateAiReply(text) {
-        const b = BRANDS[currentVideo.brand];
-        let reply = '';
+        const b = BRANDS[currentVideo.brand]; let reply = '';
         const lower = text.toLowerCase();
-        if (lower.includes('笑话') || lower.includes('搞笑') || lower.includes('好玩')) {
-            reply = AI_KNOWLEDGE.jokes[Math.floor(Math.random() * AI_KNOWLEDGE.jokes.length)];
-        } else if (lower.includes('价格') || lower.includes('多少钱') || lower.includes('贵')) {
-            reply = AI_KNOWLEDGE.general['价格'][currentVideo.brand] + ' 不过具体价格以官方为准哦~';
-        } else if (lower.includes('场景') || lower.includes('适合') || lower.includes('什么时候')) {
-            reply = '这个产品适合：' + AI_KNOWLEDGE.general['场景'][currentVideo.brand];
-        } else if (lower.includes('特点') || lower.includes('优势') || lower.includes('竞品') || lower.includes('对比')) {
-            reply = b.name + '的核心特点是：' + AI_KNOWLEDGE.general['特点'][currentVideo.brand] + '。不过我建议你亲自体验一下~';
-        } else if (lower.includes('天气') || lower.includes('你好') || lower.includes('嗨') || lower.includes('聊天')) {
-            reply = AI_KNOWLEDGE.chitchat[Math.floor(Math.random() * AI_KNOWLEDGE.chitchat.length)];
-        } else if (lower.includes('品牌') || lower.includes('介绍')) {
-            reply = `${b.name}——${b.slogan.replace('<br>',' ')}。${AI_KNOWLEDGE.general['特点'][currentVideo.brand]}。`;
-        } else {
-            reply = `关于"${text}"，我可能不太了解。不过我可以聊聊产品场景、特点，或者给你讲个笑话~ 你也可以试试问我"讲个笑话"😄`;
-        }
+        if (lower.includes('笑话') || lower.includes('搞笑') || lower.includes('好玩')) reply = AI_KNOWLEDGE.jokes[Math.floor(Math.random() * AI_KNOWLEDGE.jokes.length)];
+        else if (lower.includes('价格') || lower.includes('多少钱') || lower.includes('贵')) reply = AI_KNOWLEDGE.general['价格'][currentVideo.brand] + ' 不过具体价格以官方为准哦~';
+        else if (lower.includes('场景') || lower.includes('适合') || lower.includes('什么时候')) reply = '这个产品适合：' + AI_KNOWLEDGE.general['场景'][currentVideo.brand];
+        else if (lower.includes('特点') || lower.includes('优势') || lower.includes('竞品') || lower.includes('对比')) reply = b.name + '的核心特点是：' + AI_KNOWLEDGE.general['特点'][currentVideo.brand] + '。不过我建议你亲自体验一下~';
+        else if (lower.includes('天气') || lower.includes('你好') || lower.includes('嗨') || lower.includes('聊天')) reply = AI_KNOWLEDGE.chitchat[Math.floor(Math.random() * AI_KNOWLEDGE.chitchat.length)];
+        else if (lower.includes('品牌') || lower.includes('介绍')) reply = `${b.name}——${b.slogan.replace('<br>',' ')}。${AI_KNOWLEDGE.general['特点'][currentVideo.brand]}。`;
+        else reply = `关于"${text}"，我可能不太了解。不过我可以聊聊产品场景、特点，或者给你讲个笑话~ 你也可以试试问我"讲个笑话"😄`;
         setTimeout(() => addAiMsg('ai', reply), 500);
     }
     function addAiMsg(role, text) {
@@ -568,28 +705,15 @@
         msgs.scrollTop = msgs.scrollHeight;
     }
 
-    // 企鹅交互
     const penguinBody = document.getElementById('penguinBodyWrapper');
     let clickTimer = null, waitingFirstQuestion = false;
     penguinBody.addEventListener('click', (e) => {
         if (waitingFirstQuestion) { showBubble('🐧 马上出题哦～'); return; }
         if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; return; }
-        clickTimer = setTimeout(() => {
-            clickTimer = null;
-            if (!adActive || !penguinVisible || questionActive || cooldown || waitingForNext) return;
-            showBubble(`💬 你好呀！`); intimacy++; updateStats();
-        }, 250);
+        clickTimer = setTimeout(() => { clickTimer = null; if (!adActive || !penguinVisible || questionActive || cooldown || waitingForNext) return; showBubble(`💬 你好呀！`); intimacy++; updateStats(); }, 250);
     });
-    penguinBody.addEventListener('dblclick', () => {
-        if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; }
-        updateStats();
-        document.getElementById('dressUpOverlay').classList.add('show');
-    });
-
-    window.openUserCenter = function() {
-        updateStats();
-        document.getElementById('userCenterOverlay').classList.add('show');
-    };
+    penguinBody.addEventListener('dblclick', () => { if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; } updateStats(); document.getElementById('dressUpOverlay').classList.add('show'); });
+    window.openUserCenter = function() { updateStats(); document.getElementById('userCenterOverlay').classList.add('show'); };
 
     function formatTime(s) { const m = Math.floor(s/60), sec = s%60; return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; }
 
